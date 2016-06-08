@@ -42,6 +42,8 @@ public class SearchEngine
 			break;
 		case DatabaseType.WILEY:
 			break;
+		case DatabaseType.CAMBRIDGE_UNIVERSITY_PRESS:
+			break;
 		default:
 			break;
 		}
