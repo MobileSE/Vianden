@@ -109,7 +109,7 @@ public class SearchEngine
 			}
 		}
 		
-		return null;
+		return paperlist;
 	}
 	
 	/**
@@ -117,16 +117,97 @@ public class SearchEngine
 	 * 
 	 * @param paper
 	 * @return the enriched version of the given paper
+	 * @throws Exception 
 	 */
-	public Paper refine(Paper paper)
+	public Paper refine(Paper paper) throws Exception
 	{
+		String html = this.getHtml(paper.getpDoi());
+		
+		String abstractStr ="";
+		String keywordsStr = "";
+		String emailStr ="";
+		String pdfUrlStr = "";
+		int firstPage = -1;
+		int lastPage = -1;
+		int pages = 0;
+		List<String> reference = null;
+		
+		Document doc = Jsoup.parse(html);
+		
+		Elements metaEles = doc.getElementsByTag("meta");
+		for(Element ele :metaEles){
+			String name = ele.attr("name");
+			if(name.equals("citation_keywords")){	//keywords:IEEE
+				keywordsStr = ele.attr("content");
+				keywordsStr = keywordsStr.replaceAll("\t|\r|\n", "");
+			}else if(name.equals("citation_author_email")){	//email:IEEE, Springer
+				emailStr += ele.attr("content") + ";";
+			}else if(name.equals("citation_pdf_url")){	//pdf:IEEE, Springer
+				pdfUrlStr = ele.attr("content");
+			}else if(name.equals("citation_abstract_html_url")){ //abstract_html_url:IEEE, Springer
+				abstractStr = ele.attr("content");
+			}else if(name.equals("citation_firstpage")){
+				firstPage = Integer.valueOf(ele.attr("citation_firstpage")); //firstPage:IEEE, Springer
+			}else if(name.equals("citation_lastpage")){
+				lastPage = Integer.valueOf(ele.attr("citation_lastpage")); //lastPage:IEEE, Springer
+			}
+		}
+		
+		if(firstPage!=-1 && lastPage!=-1){
+			pages = lastPage - firstPage + 1;
+		}
+		
 		switch (paper.getpDatabaseType())
 		{
 		case DatabaseType.ACM:
 			break;
 		case DatabaseType.IEEE:
+			//abstract
+			Element ieee = doc.select("div.article").first();
+			abstractStr = ieee.text();
+			
+			//references
+			reference = new ArrayList<String>();
+			Element ref = doc.getElementById("abstract-references-tab");
+			String refurl = "http://ieeexplore.ieee.org"+ref.attr("href");
+			String refhtml = this.getHtml(refurl);
+			Elements docsClass = Jsoup.parse(refhtml).getElementsByClass("docs");
+			if(docsClass != null){
+				Element docs = docsClass.first();
+				Elements refs = docs.getElementsByTag("li");
+				for(Element li : refs){
+					String refstr = li.text();
+					reference.add(refstr);
+				}
+			}
 			break;
 		case DatabaseType.SPRINGER:
+			Element springer = doc.getElementById("Abs1");
+			if(springer!=null){
+				//abstract
+				Element absEle = springer.select("p.Para").first();
+				abstractStr= absEle.text();
+				//keywords
+				Element keyGroupEle = doc.select("div.KeywordGroup").first();
+				if(keyGroupEle != null){
+					Elements keyEles = keyGroupEle.getElementsByClass("Keyword");
+	    			
+	    			for(Element keyword : keyEles){
+	    				String kw = keyword.text()+";";
+	    				keywordsStr += kw;
+	    			}
+				}
+				//references
+				reference = new ArrayList<String>();
+				Element refs = doc.getElementById("abstract-references");
+				if(refs != null){
+					Elements lis = refs.getElementsByClass("Citation");
+					for(Element li:lis){
+						String refstr = li.text();
+						reference.add(refstr);
+					}
+				}
+			}
 			break;
 		case DatabaseType.ELSEVIER:
 			break;
@@ -140,6 +221,14 @@ public class SearchEngine
 			break;
 		}
 		
+		
+		//set paper's informations
+		paper.setpAbstract(abstractStr);
+		paper.setpEmail(emailStr);
+		paper.setpKeywords(keywordsStr);
+		paper.setpPdfUrl(pdfUrlStr);
+		paper.setpPages(String.valueOf(pages));
+		paper.setpReferences(reference);
 		
 		return paper;
 	}
