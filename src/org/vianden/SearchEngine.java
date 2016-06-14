@@ -9,7 +9,9 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -127,10 +129,12 @@ public class SearchEngine
 		String keywordsStr = "";
 		String emailStr ="";
 		String pdfUrlStr = "";
-		int firstPage = -1;
-		int lastPage = -1;
+		int firstPage = 0;
+		int lastPage = 0;
 		int pages = 0;
 		List<String> reference = null;
+		List<Author> authors = new ArrayList<Author>();
+		Set<String> authorInstitutionSet  = new HashSet<String>();
 		
 		Document doc = Jsoup.parse(html);
 		
@@ -142,18 +146,23 @@ public class SearchEngine
 				keywordsStr = keywordsStr.replaceAll("\t|\r|\n", "");
 			}else if(name.equals("citation_author_email")){	//email:IEEE, Springer
 				emailStr += ele.attr("content") + ";";
-			}else if(name.equals("citation_pdf_url")){	//pdf:IEEE, Springer
+			}else if(name.equals("citation_pdf_url")){	//pdf:IEEE, Springer, USENIX
 				pdfUrlStr = ele.attr("content");
 			}else if(name.equals("citation_abstract_html_url")){ //abstract_html_url:IEEE, Springer
 				abstractStr = ele.attr("content");
 			}else if(name.equals("citation_firstpage")){
-				firstPage = Integer.valueOf(ele.attr("citation_firstpage")); //firstPage:IEEE, Springer
+				firstPage = Integer.valueOf(ele.attr("content")); //firstPage:IEEE, Springer, USENIX
 			}else if(name.equals("citation_lastpage")){
-				lastPage = Integer.valueOf(ele.attr("citation_lastpage")); //lastPage:IEEE, Springer
+				lastPage = Integer.valueOf(ele.attr("content")); //lastPage:IEEE, Springer, USENIX
 			}
+//			else if(name.equals("citation_author_institution")){
+//				authorInstitutionSet.add(ele.attr("citation_author_institution"));
+//			}else if(name.equals("citation_author")){
+//				authors.ad
+//			}
 		}
 		
-		if(firstPage!=-1 && lastPage!=-1){
+		if(firstPage!=0 && lastPage!=0){
 			pages = lastPage - firstPage + 1;
 		}
 		
@@ -169,7 +178,8 @@ public class SearchEngine
 			//references
 			reference = new ArrayList<String>();
 			Element ref = doc.getElementById("abstract-references-tab");
-			String refurl = "http://ieeexplore.ieee.org"+ref.attr("href");
+			//can not get absolute address via .attr("abs:href")
+			String refurl = "http://ieeexplore.ieee.org" + ref.attr("href"); 
 			String refhtml = this.getHtml(refurl);
 			Elements docsClass = Jsoup.parse(refhtml).getElementsByClass("docs");
 			if(docsClass != null){
@@ -212,8 +222,40 @@ public class SearchEngine
 		case DatabaseType.ELSEVIER:
 			break;
 		case DatabaseType.WILEY:
+			//keywords
+			Element keylist = doc.getElementById("abstractKeywords1");
+			Elements lis = keylist.getElementsByTag("li");
+			for(Element li : lis){
+				keywordsStr += li.text();
+			}
+			//abstract
+			Element absWilly = doc.getElementById("abstract");
+			Elements ps = absWilly.getElementsByTag("p");
+			abstractStr = "";
+			for(Element p : ps){
+				abstractStr += p.text();
+			}
+			//references
+			Element refWiley = doc.select(".tabbedContent").first().getElementsByTag("a").get(1);
+			//can not get absolute address via .attr("abs:href")
+			String refWileyUrl = "http://onlinelibrary.wiley.com" + refWiley.attr("href");
+			String refWileyHtml = this.getHtml(refWileyUrl);
+			Elements refsWiley = Jsoup.parse(refWileyHtml).getElementById("fulltext").getElementsByTag("cite");
+			reference = new ArrayList<String>();
+			for(Element refinfo : refsWiley){
+				reference.add(refinfo.text());
+			}
+			
 			break;
 		case DatabaseType.USENIX:
+			Elements usenix = doc.select(".field.field-name-field-paper-description.field-type-text-long.field-label-above")
+			.select(".field-items");
+			if(usenix != null){
+				//abstract
+				Element absUsenix = usenix.first();
+				abstractStr = absUsenix.text();
+				//no reference and keywords
+			}
 			break;
 		case DatabaseType.IET:
 			break;
@@ -230,6 +272,13 @@ public class SearchEngine
 		paper.setpPages(String.valueOf(pages));
 		paper.setpReferences(reference);
 		
+//		System.out.println("--------------");
+//		System.out.println("abs:"+paper.getpAbstract());
+//		System.out.println("email:"+paper.getpEmail());
+//		System.out.println("keywords:"+paper.getpKeywords());
+//		System.out.println("pdf:"+paper.getpPdfUrl());
+//		System.out.println("pages:"+paper.getpPages());
+//		System.out.println("ref:"+paper.getpReferences());
 		return paper;
 	}
 	
