@@ -9,6 +9,7 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -141,20 +142,20 @@ public class SearchEngine
 		for(int i=0; i< metaEles.size(); ++i){
 			Element ele = metaEles.get(i);
 			String name = ele.attr("name");
-			if(name.equals("citation_keywords")){	//keywords:IEEE
+			if(name.equals("citation_keywords")){	//keywords:IEEE,IET
 				keywordsStr = ele.attr("content");
 				keywordsStr = keywordsStr.replaceAll("\t|\r|\n", "");
 			}else if(name.equals("citation_author_email")){	//email:IEEE, Springer
 				emailStr += ele.attr("content") + ";";
 			}else if(name.equals("citation_pdf_url")){	//pdf:IEEE, Springer, USENIX
 				pdfUrlStr = ele.attr("content");
-			}else if(name.equals("citation_abstract_html_url")){ //abstract_html_url:IEEE, Springer
+			}else if(name.equals("citation_abstract")){ //citation_abstract:IET
 				abstractStr = ele.attr("content");
 			}else if(name.equals("citation_firstpage")){
-				firstPage = Integer.valueOf(ele.attr("content")); //firstPage:IEEE, Springer, USENIX, Willy
+				firstPage = Integer.valueOf(ele.attr("content")); //firstPage:IEEE, Springer, USENIX, Willy, IET
 			}else if(name.equals("citation_lastpage")){
-				lastPage = Integer.valueOf(ele.attr("content")); //lastPage:IEEE, Springer, USENIX, Willy
-			}else if(name.equals("citation_author")){	//authors:IEEE, Springer, Willy
+				lastPage = Integer.valueOf(ele.attr("content")); //lastPage:IEEE, Springer, USENIX, Willy, IET
+			}else if(name.equals("citation_author")){	//authors:IEEE, Springer, Willy, IET
 				//define informations of author
 				String authorName = ele.attr("content");
 				Set<String> authorInstitutionSet  = new HashSet<String>();
@@ -191,9 +192,10 @@ public class SearchEngine
 			Element ref = doc.getElementById("abstract-references-tab");
 			//can not get absolute address via .attr("abs:href")
 			String refurl = "http://ieeexplore.ieee.org" + ref.attr("href"); 
+			
 			String refhtml = this.getHtml(refurl);
 			Elements docsClass = Jsoup.parse(refhtml).getElementsByClass("docs");
-			if(docsClass != null){
+			if(docsClass.size()>0){
 				Element docs = docsClass.first();
 				Elements refs = docs.getElementsByTag("li");
 				for(Element li : refs){
@@ -231,6 +233,50 @@ public class SearchEngine
 			}
 			break;
 		case DatabaseType.ELSEVIER:
+			//keywords
+			Element keywordsElsvier = doc.getElementsByClass("keyword").first();
+			keywordsStr = keywordsElsvier.text();
+			//abstract
+			Element absElsvier = doc.select(".abstract").select(".svAbstract").get(1).getElementsByTag("p").first();
+			abstractStr = absElsvier.text();
+			//affiliations
+			HashMap<String, String> affMap = new HashMap<String, String>();
+			Element affiliations = doc.select(".affiliation").select(".authAffil").first();
+			System.out.println(affiliations.text());
+			Elements afflis = affiliations.getElementsByTag("li");
+			for(Element affli:afflis){
+				String tag = affli.getElementsByTag("sup").first().text();
+				String affName = affli.getElementsByTag("span").first().text();
+				affMap.put(tag, affName);
+			}
+			//authors
+			Element authorElsvier = doc.select(".authorGroup.noCollab.svAuthor").first();
+			Elements authorElsvierLis = authorElsvier.getElementsByTag("li");
+			for(Element li : authorElsvierLis){
+				String authorName = li.select(".authorName.svAuthor").first().text();
+				//get author affiliations
+				Set<String> authorInstitutionSet  = new HashSet<String>();
+				Elements affs = li.select(".intra_ref.auth_aff");
+				for(Element aff : affs){
+					String tag = aff.text();
+					String institution = affMap.get(tag);
+					authorInstitutionSet.add(institution);
+				}
+				//add to authors
+				Author author = new Author(authorName, authorInstitutionSet);
+				authors.add(author);
+				
+				//Email
+				Elements emailAs = li.getElementsByClass("auth_mail");
+				for(int i=0; i<emailAs.size(); ++i){
+					Element email = emailAs.get(i);
+					emailStr+=email.attr("href").replace("mailto:", "") + ";";
+				}
+			}
+			//pdfStr
+			pdfUrlStr = doc.getElementById("pdfLink").attr("pdfurl");
+			//no references, pages
+			
 			break;
 		case DatabaseType.WILEY:
 			//keywords
@@ -269,11 +315,77 @@ public class SearchEngine
 			}
 			break;
 		case DatabaseType.IET:
+			Elements as = doc.getElementsByTag("a");
+			//iet database url
+			String ieturl = as.get(2).attr("href");
+			String ietHtml = this.getHtml(ieturl);
+			//refine by iet database
+			Document ietdoc = Jsoup.parse(ietHtml);
+			Elements ietmetaEles = ietdoc.getElementsByTag("meta");
+			for(int i=0; i< ietmetaEles.size(); ++i){
+				Element ele = ietmetaEles.get(i);
+				String name = ele.attr("name");
+				if(name.equals("citation_keywords")){	//keywords
+					keywordsStr = ele.attr("content");
+					keywordsStr = keywordsStr.replaceAll("\t|\r|\n", "");
+				}else if(name.equals("citation_author_email")){	//email
+					emailStr += ele.attr("content") + ";";
+				}else if(name.equals("citation_abstract")){ //abstract
+					abstractStr = ele.attr("content");
+				}else if(name.equals("citation_firstpage")){
+					firstPage = Integer.valueOf(ele.attr("content")); //firstPage
+				}else if(name.equals("citation_lastpage")){
+					lastPage = Integer.valueOf(ele.attr("content")); //lastPage:
+				}else if(name.equals("citation_author")){	//authors
+					//define informations of author
+					String authorName = ele.attr("content");
+					Set<String> authorInstitutionSet  = new HashSet<String>();
+					//get affiliations
+					for(int j=i+1; j<metaEles.size(); ++j){
+						Element eleInstitution = metaEles.get(j);
+						if(eleInstitution!=null && eleInstitution.attr("name").equals("citation_author_institution")){
+							authorInstitutionSet.add(eleInstitution.attr("content"));
+						}else{
+							break;
+						}
+					}
+					//construct author
+					Author author = new Author(authorName, authorInstitutionSet);
+					authors.add(author);
+				}
+			}
+			
+			//set pages
+			if(firstPage!=0 && lastPage!=0){
+				pages = lastPage - firstPage + 1;
+			}
+			
+			//get references
+			Elements reflis = ietdoc.getElementsByClass("refdetail");
+			reference = new ArrayList<String>();
+			for(Element refli : reflis){
+				reference.add(refli.text());
+			}
+			
+			//ieee database url to get pdf
+			//refine by ieee database
+			String ieeeurl = as.get(3).attr("href");
+			String ieeeHtml = this.getHtml(ieeeurl);
+			Document ieeedoc = Jsoup.parse(ieeeHtml);
+			Elements ieeemetaEles = ieeedoc.getElementsByTag("meta");
+			for(int i=0; i< ieeemetaEles.size(); ++i){
+				Element ele = ieeemetaEles.get(i);
+				String name = ele.attr("name");
+				if(name.equals("citation_author_email")){	//email
+					emailStr += ele.attr("content") + ";";
+				}else if(name.equals("citation_pdf_url")){	//pdf
+					pdfUrlStr = ele.attr("content");
+				}
+			}
 			break;
 		default:
 			break;
 		}
-		
 		
 		//set paper's informations
 		paper.setpAbstract(abstractStr);
@@ -286,14 +398,6 @@ public class SearchEngine
 			paper.setpAuthors(authors);
 		}
 		
-		System.out.println("--------------");
-		System.out.println("abs:"+paper.getpAbstract());
-		System.out.println("email:"+paper.getpEmail());
-		System.out.println("keywords:"+paper.getpKeywords());
-		System.out.println("pdf:"+paper.getpPdfUrl());
-		System.out.println("pages:"+paper.getpPages());
-		System.out.println("ref:"+paper.getpReferences());
-		System.out.println("authors"+paper.getpAuthors());
 		return paper;
 	}
 	
@@ -328,7 +432,7 @@ public class SearchEngine
 			}
 			//get doi
 			String doi = ele.select(".publ").select(".head").get(0).getElementsByTag("a").first().attr("href");
-			//get database type, but it seems that database type can be determined by doi except acm
+			//get database type by doi number
 			int dbtype = -1;
 			if(doi.contains("10.1145")){
 				dbtype = DatabaseType.ACM;
