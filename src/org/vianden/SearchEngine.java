@@ -275,8 +275,25 @@ public class SearchEngine
 			}
 			//pdfStr
 			pdfUrlStr = doc.getElementById("pdfLink").attr("pdfurl");
-			//no references, pages
+			//pages
+			Element volIssue = doc.getElementsByClass("volIssue").first();
+			String volStr[] = volIssue.text().split(",");
+			String pageStr[] = null;
+			for(String str : volStr){
+				if(str.contains("Pages")){
+					str = str.trim();
+					pageStr = str.substring(5).split("–");
+				}
+			}
 			
+			if(pageStr != null){
+				if(pageStr.length == 2){
+					pages = Integer.valueOf(pageStr[1].trim()) - Integer.valueOf(pageStr[0].trim()) + 1;
+				}else if(pageStr.length == 1){
+					pages = 1;
+				}
+			}
+			//no references
 			break;
 		case DatabaseType.WILEY:
 			//keywords
