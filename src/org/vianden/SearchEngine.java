@@ -134,12 +134,12 @@ public class SearchEngine
 		int pages = 0;
 		List<String> reference = null;
 		List<Author> authors = new ArrayList<Author>();
-		Set<String> authorInstitutionSet  = new HashSet<String>();
 		
 		Document doc = Jsoup.parse(html);
 		
 		Elements metaEles = doc.getElementsByTag("meta");
-		for(Element ele :metaEles){
+		for(int i=0; i< metaEles.size(); ++i){
+			Element ele = metaEles.get(i);
 			String name = ele.attr("name");
 			if(name.equals("citation_keywords")){	//keywords:IEEE
 				keywordsStr = ele.attr("content");
@@ -151,15 +151,26 @@ public class SearchEngine
 			}else if(name.equals("citation_abstract_html_url")){ //abstract_html_url:IEEE, Springer
 				abstractStr = ele.attr("content");
 			}else if(name.equals("citation_firstpage")){
-				firstPage = Integer.valueOf(ele.attr("content")); //firstPage:IEEE, Springer, USENIX
+				firstPage = Integer.valueOf(ele.attr("content")); //firstPage:IEEE, Springer, USENIX, Willy
 			}else if(name.equals("citation_lastpage")){
-				lastPage = Integer.valueOf(ele.attr("content")); //lastPage:IEEE, Springer, USENIX
+				lastPage = Integer.valueOf(ele.attr("content")); //lastPage:IEEE, Springer, USENIX, Willy
+			}else if(name.equals("citation_author")){	//authors:IEEE, Springer, Willy
+				//define informations of author
+				String authorName = ele.attr("content");
+				Set<String> authorInstitutionSet  = new HashSet<String>();
+				//get affiliations
+				for(int j=i+1; j<metaEles.size(); ++j){
+					Element eleInstitution = metaEles.get(j);
+					if(eleInstitution!=null && eleInstitution.attr("name").equals("citation_author_institution")){
+						authorInstitutionSet.add(eleInstitution.attr("content"));
+					}else{
+						break;
+					}
+				}
+				//construct author
+				Author author = new Author(authorName, authorInstitutionSet);
+				authors.add(author);
 			}
-//			else if(name.equals("citation_author_institution")){
-//				authorInstitutionSet.add(ele.attr("citation_author_institution"));
-//			}else if(name.equals("citation_author")){
-//				authors.ad
-//			}
 		}
 		
 		if(firstPage!=0 && lastPage!=0){
@@ -271,14 +282,18 @@ public class SearchEngine
 		paper.setpPdfUrl(pdfUrlStr);
 		paper.setpPages(String.valueOf(pages));
 		paper.setpReferences(reference);
+		if(authors.size()>0){
+			paper.setpAuthors(authors);
+		}
 		
-//		System.out.println("--------------");
-//		System.out.println("abs:"+paper.getpAbstract());
-//		System.out.println("email:"+paper.getpEmail());
-//		System.out.println("keywords:"+paper.getpKeywords());
-//		System.out.println("pdf:"+paper.getpPdfUrl());
-//		System.out.println("pages:"+paper.getpPages());
-//		System.out.println("ref:"+paper.getpReferences());
+		System.out.println("--------------");
+		System.out.println("abs:"+paper.getpAbstract());
+		System.out.println("email:"+paper.getpEmail());
+		System.out.println("keywords:"+paper.getpKeywords());
+		System.out.println("pdf:"+paper.getpPdfUrl());
+		System.out.println("pages:"+paper.getpPages());
+		System.out.println("ref:"+paper.getpReferences());
+		System.out.println("authors"+paper.getpAuthors());
 		return paper;
 	}
 	
