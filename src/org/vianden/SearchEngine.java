@@ -77,6 +77,7 @@ public class SearchEngine
 							for(Element a :as){
 								String url = a.attr("href");
 								System.out.println("url:"+url);
+								//get papers of each journals and add to papaer list
 								List<Paper> list = this.getPaper(url, "article", venue);
 								paperlist.addAll(list);
 							}
@@ -125,6 +126,7 @@ public class SearchEngine
 	public Paper refine(Paper paper) throws Exception
 	{
 		String html = this.getHtml(paper.getpDoi());
+//		String html = paper.getpDoi();
 		
 		String abstractStr ="";
 		String keywordsStr = "";
@@ -142,17 +144,17 @@ public class SearchEngine
 		for(int i=0; i< metaEles.size(); ++i){
 			Element ele = metaEles.get(i);
 			String name = ele.attr("name");
-			if(name.equals("citation_keywords")){	//keywords:IEEE,IET
+			if(name.equals("citation_keywords")){	//keywords:IEEE,IET,ACM
 				keywordsStr = ele.attr("content");
 				keywordsStr = keywordsStr.replaceAll("\t|\r|\n", "");
 			}else if(name.equals("citation_author_email")){	//email:IEEE, Springer
 				emailStr += ele.attr("content") + ";";
-			}else if(name.equals("citation_pdf_url")){	//pdf:IEEE, Springer, USENIX
+			}else if(name.equals("citation_pdf_url")){	//pdf:IEEE, Springer, USENIX, ACM
 				pdfUrlStr = ele.attr("content");
 			}else if(name.equals("citation_abstract")){ //citation_abstract:IET
 				abstractStr = ele.attr("content");
 			}else if(name.equals("citation_firstpage")){
-				firstPage = Integer.valueOf(ele.attr("content")); //firstPage:IEEE, Springer, USENIX, Willy, IET
+				firstPage = Integer.valueOf(ele.attr("content")); //firstPage:IEEE, Springer, USENIX, Willy, IET, ACM
 			}else if(name.equals("citation_lastpage")){
 				lastPage = Integer.valueOf(ele.attr("content")); //lastPage:IEEE, Springer, USENIX, Willy, IET
 			}else if(name.equals("citation_author")){	//authors:IEEE, Springer, Willy, IET
@@ -176,17 +178,83 @@ public class SearchEngine
 		
 		if(firstPage!=0 && lastPage!=0){
 			pages = lastPage - firstPage + 1;
+		}else if(firstPage!=0 || lastPage!=0){
+			pages = 1;
 		}
 		
 		switch (paper.getpDatabaseType())
 		{
 		case DatabaseType.ACM:
+			//authors
+			Element table = doc.getElementById("divmain").getElementsByTag("table").get(2);
+			Elements trs = table.getElementsByTag("tr");
+			for(Element tr : trs){
+				Elements tds = tr.getElementsByTag("td");
+				String name = tds.get(1).text();
+				Set<String> authorInstitutionSet  = new HashSet<String>();
+				if(tds.size() > 2){
+					for(int i=2; i<tds.size(); ++i){
+						authorInstitutionSet.add(tds.get(i).text());
+					}
+				}
+				//construct author add to authors list
+				Author author = new Author(name, authorInstitutionSet);
+				authors.add(author);
+			}
+			//get the destination of script
+			Elements scripts = doc.getElementsByTag("script");
+			String desStr = null;
+			for(Element script:scripts){
+				if(script.toString().contains("initializeTabLayout")){
+					desStr = script.toString();
+					break;
+				}
+			}
+			//abstract, references
+			if(desStr != null){
+				String prefix = "http://dl.acm.org/";
+				String absStartStr = "'bindTo':'abstract','bindExpr':['";
+				String refStartStr = "'bindTo':'references','bindExpr':['";	
+				String endStr = "']},ColdFusion.Bind.urlBindHandler,true);";
+				//abstract suffix
+				int absstart = desStr.indexOf(absStartStr) + absStartStr.length();
+				int absend = desStr.indexOf(endStr);
+				String abssuffix = desStr.substring(absstart, absend);
+				
+				//direct to referenes
+				desStr = desStr.substring(absend + endStr.length());
+				desStr = desStr.substring(desStr.indexOf(endStr) + endStr.length());
+				
+				//references suffix 
+				int refstart = desStr.indexOf(refStartStr) + refStartStr.length();
+				int refend = desStr.indexOf(endStr);
+				String refsuffix = desStr.substring(refstart, refend);
+				
+				//get abstract
+				abstractStr = this.getHtml(prefix + abssuffix);
+				System.out.println(abssuffix);
+				System.out.println(refsuffix);
+				
+				//get references
+				reference = new ArrayList<String>();
+				String refhtml = this.getHtml(prefix + refsuffix);
+				if(refhtml != null){
+					Elements acmrefs = Jsoup.parse(refhtml).getElementsByTag("tr");
+					for(Element tr : acmrefs){
+						Element td = tr.getElementsByTag("td").get(1);
+						reference.add(td.text());
+					}
+				}else{
+					System.out.println("ref null");
+				}
+				
+			}
+//			System.out.println(table.toString());
 			break;
 		case DatabaseType.IEEE:
 			//abstract
 			Element ieee = doc.select("div.article").first();
 			abstractStr = ieee.text();
-			
 			//references
 			reference = new ArrayList<String>();
 			Element ref = doc.getElementById("abstract-references-tab");
@@ -503,8 +571,9 @@ public class SearchEngine
         String tempLine = null;
         
         if (httpURLConnection.getResponseCode() >= 300) {
-            return null;
-        	//throw new Exception("HTTP Request is not success, Response code is " + httpURLConnection.getResponseCode());
+            
+        	throw new Exception("HTTP Request is not success, Response code is " + httpURLConnection.getResponseCode());
+//        	return null;
         }
         
         try {
