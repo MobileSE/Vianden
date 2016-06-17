@@ -44,7 +44,6 @@ public class SearchEngine
 		//read paper sites from config file to paperlist
 		FileReader reader = new FileReader(System.getProperty("user.dir") + "/res/dblp.config");
 		BufferedReader br = new BufferedReader(reader);
-		
 		String str = null;
 		while((str = br.readLine()) !=null){
 			System.out.println(str);
@@ -57,11 +56,11 @@ public class SearchEngine
 		System.out.println("cur year:"+currentYear);
 		for(int index=0; index<urllist.size(); ++index){
 			String dblpUrl = urllist.get(index);
-			String html = this.getHtml(dblpUrl);
+			Document doc = Jsoup.connect(dblpUrl).userAgent("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_5) AppleWebKit/601.6.17 (KHTML, like Gecko) Version/9.1.1 Safari/601.6.17")
+					.timeout(10000).get();
 			
 			//start analyzing corresponding to journal and conference
 			if(dblpUrl.contains("db/journals")){
-				Document doc = Jsoup.parse(html);
 				Element main = doc.getElementById("main");
 				Elements lis = main.getElementsByTag("li");
 				//get venue
@@ -87,7 +86,6 @@ public class SearchEngine
 				}
 				
 			}else if(dblpUrl.contains("db/conf")){
-				Document doc = Jsoup.parse(html);
 				Elements eles = doc.select(".entry");
 				
 				String venue = doc.select(".headline").select(".noline").first().text();
@@ -124,10 +122,7 @@ public class SearchEngine
 	 * @throws Exception 
 	 */
 	public Paper refine(Paper paper) throws Exception
-	{
-		String html = this.getHtml(paper.getpDoi());
-//		String html = paper.getpDoi();
-		
+	{	
 		String abstractStr ="";
 		String keywordsStr = "";
 		String emailStr ="";
@@ -138,7 +133,8 @@ public class SearchEngine
 		List<String> reference = null;
 		List<Author> authors = new ArrayList<Author>();
 		
-		Document doc = Jsoup.parse(html);
+		Document doc = Jsoup.connect(paper.getpDoi()).userAgent("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_5) AppleWebKit/601.6.17 (KHTML, like Gecko) Version/9.1.1 Safari/601.6.17")
+				.timeout(20000).get();
 		
 		Elements metaEles = doc.getElementsByTag("meta");
 		for(int i=0; i< metaEles.size(); ++i){
@@ -231,17 +227,21 @@ public class SearchEngine
 				String refsuffix = desStr.substring(refstart, refend);
 				
 				//get abstract
-				abstractStr = this.getHtml(prefix + abssuffix);
+				Elements ps = Jsoup.connect(prefix + abssuffix).userAgent("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_5) AppleWebKit/601.6.17 (KHTML, like Gecko) Version/9.1.1 Safari/601.6.17")
+						.timeout(10000).get().getElementsByTag("p");
+				if(ps.size()>0){
+					abstractStr = ps.first().text();
+				}
 				System.out.println(abssuffix);
 				System.out.println(refsuffix);
 				
 				//get references
 				reference = new ArrayList<String>();
-				String refhtml = this.getHtml(prefix + refsuffix);
-				if(refhtml != null){
-					Elements acmrefs = Jsoup.parse(refhtml).getElementsByTag("tr");
+				Elements acmrefs = Jsoup.connect(prefix + refsuffix).userAgent("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_5) AppleWebKit/601.6.17 (KHTML, like Gecko) Version/9.1.1 Safari/601.6.17")
+						.timeout(10000).get().getElementsByTag("tr");
+				if(acmrefs != null){
 					for(Element tr : acmrefs){
-						Element td = tr.getElementsByTag("td").get(1);
+						Element td = tr.getElementsByTag("td").get(2);
 						reference.add(td.text());
 					}
 				}else{
@@ -261,9 +261,10 @@ public class SearchEngine
 			//can not get absolute address via .attr("abs:href")
 			String refurl = "http://ieeexplore.ieee.org" + ref.attr("href"); 
 			
-			String refhtml = this.getHtml(refurl);
-			Elements docsClass = Jsoup.parse(refhtml).getElementsByClass("docs");
-			if(docsClass.size()>0){
+			Document redoc = Jsoup.connect(refurl).userAgent("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_5) AppleWebKit/601.6.17 (KHTML, like Gecko) Version/9.1.1 Safari/601.6.17")
+					.timeout(10000).get();
+			Elements docsClass = redoc.getElementsByClass("docs");
+			if(docsClass!=null && docsClass.size()>0){
 				Element docs = docsClass.first();
 				Elements refs = docs.getElementsByTag("li");
 				for(Element li : refs){
@@ -381,8 +382,9 @@ public class SearchEngine
 			Element refWiley = doc.select(".tabbedContent").first().getElementsByTag("a").get(1);
 			//can not get absolute address via .attr("abs:href")
 			String refWileyUrl = "http://onlinelibrary.wiley.com" + refWiley.attr("href");
-			String refWileyHtml = this.getHtml(refWileyUrl);
-			Elements refsWiley = Jsoup.parse(refWileyHtml).getElementById("fulltext").getElementsByTag("cite");
+			Document reWileyDoc = Jsoup.connect(refWileyUrl).userAgent("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_5) AppleWebKit/601.6.17 (KHTML, like Gecko) Version/9.1.1 Safari/601.6.17")
+					.timeout(10000).get();
+			Elements refsWiley = reWileyDoc.getElementById("fulltext").getElementsByTag("cite");
 			reference = new ArrayList<String>();
 			for(Element refinfo : refsWiley){
 				reference.add(refinfo.text());
@@ -403,9 +405,9 @@ public class SearchEngine
 			Elements as = doc.getElementsByTag("a");
 			//iet database url
 			String ieturl = as.get(2).attr("href");
-			String ietHtml = this.getHtml(ieturl);
 			//refine by iet database
-			Document ietdoc = Jsoup.parse(ietHtml);
+			Document ietdoc = Jsoup.connect(ieturl).userAgent("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_5) AppleWebKit/601.6.17 (KHTML, like Gecko) Version/9.1.1 Safari/601.6.17")
+					.timeout(20000).get();
 			Elements ietmetaEles = ietdoc.getElementsByTag("meta");
 			for(int i=0; i< ietmetaEles.size(); ++i){
 				Element ele = ietmetaEles.get(i);
@@ -455,8 +457,8 @@ public class SearchEngine
 			//ieee database url to get pdf
 			//refine by ieee database
 			String ieeeurl = as.get(3).attr("href");
-			String ieeeHtml = this.getHtml(ieeeurl);
-			Document ieeedoc = Jsoup.parse(ieeeHtml);
+			Document ieeedoc = Jsoup.connect(ieeeurl).userAgent("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_5) AppleWebKit/601.6.17 (KHTML, like Gecko) Version/9.1.1 Safari/601.6.17")
+					.timeout(10000).get();
 			Elements ieeemetaEles = ieeedoc.getElementsByTag("meta");
 			for(int i=0; i< ieeemetaEles.size(); ++i){
 				Element ele = ieeemetaEles.get(i);
@@ -496,12 +498,13 @@ public class SearchEngine
 	private List<Paper> getPaper(String url, String type, String venue) throws Exception{
 		List<Paper> list = new ArrayList<Paper>();
 	
-		String html = this.getHtml(url);
-		Elements doc = Jsoup.parse(html).select(".entry").select("."+type);
+		Document doc = Jsoup.connect(url).userAgent("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_5) AppleWebKit/601.6.17 (KHTML, like Gecko) Version/9.1.1 Safari/601.6.17")
+				.timeout(10000).get();
+		Elements entries = doc.select(".entry").select("."+type);
 		
-		System.out.println("detail:"+doc.size());
+		System.out.println("detail:"+entries.size());
 		
-		for(Element ele : doc){
+		for(Element ele : entries){
 			Element data = ele.getElementsByClass("data").first();
 			//get title
 			String title = data.getElementsByClass("title").text();
@@ -550,57 +553,57 @@ public class SearchEngine
 		return list;
 	}
 	
-	/**
-	 * Web request, to get the web page details of sites that prepared to be crawled
-	 * 
-	 * @param url
-	 * @return the html of the url
-	 */
-	private String getHtml(String url) throws Exception {
-        URL localURL = new URL(url);
-        URLConnection connection = localURL.openConnection();
-        HttpURLConnection httpURLConnection = (HttpURLConnection)connection;
-        
-        httpURLConnection.setRequestProperty("Accept-Charset", "utf-8");
-        httpURLConnection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
-        
-        InputStream inputStream = null;
-        InputStreamReader inputStreamReader = null;
-        BufferedReader reader = null;
-        StringBuffer resultBuffer = new StringBuffer();
-        String tempLine = null;
-        
-        if (httpURLConnection.getResponseCode() >= 300) {
-            
-        	throw new Exception("HTTP Request is not success, Response code is " + httpURLConnection.getResponseCode());
-//        	return null;
-        }
-        
-        try {
-            inputStream = httpURLConnection.getInputStream();
-            inputStreamReader = new InputStreamReader(inputStream);
-            reader = new BufferedReader(inputStreamReader);
-            
-            while ((tempLine = reader.readLine()) != null) {
-                resultBuffer.append(tempLine);
-            }
-            
-        } finally {
-            
-            if (reader != null) {
-                reader.close();
-            }
-            
-            if (inputStreamReader != null) {
-                inputStreamReader.close();
-            }
-            
-            if (inputStream != null) {
-                inputStream.close();
-            }
-            
-        }
-        
-        return resultBuffer.toString();
-    }
+//	/**
+//	 * Web request, to get the web page details of sites that prepared to be crawled
+//	 * 
+//	 * @param url
+//	 * @return the html of the url
+//	 */
+//	private String getHtml(String url) throws Exception {
+//        URL localURL = new URL(url);
+//        URLConnection connection = localURL.openConnection();
+//        HttpURLConnection httpURLConnection = (HttpURLConnection)connection;
+//        
+//        httpURLConnection.setRequestProperty("Accept-Charset", "utf-8");
+//        httpURLConnection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+//        
+//        InputStream inputStream = null;
+//        InputStreamReader inputStreamReader = null;
+//        BufferedReader reader = null;
+//        StringBuffer resultBuffer = new StringBuffer();
+//        String tempLine = null;
+//        
+//        if (httpURLConnection.getResponseCode() >= 300) {
+//            
+//        	throw new Exception("HTTP Request is not success, Response code is " + httpURLConnection.getResponseCode());
+////        	return null;
+//        }
+//        
+//        try {
+//            inputStream = httpURLConnection.getInputStream();
+//            inputStreamReader = new InputStreamReader(inputStream);
+//            reader = new BufferedReader(inputStreamReader);
+//            
+//            while ((tempLine = reader.readLine()) != null) {
+//                resultBuffer.append(tempLine);
+//            }
+//            
+//        } finally {
+//            
+//            if (reader != null) {
+//                reader.close();
+//            }
+//            
+//            if (inputStreamReader != null) {
+//                inputStreamReader.close();
+//            }
+//            
+//            if (inputStream != null) {
+//                inputStream.close();
+//            }
+//            
+//        }
+//        
+//        return resultBuffer.toString();
+//    }
 }
