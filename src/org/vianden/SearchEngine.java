@@ -2,11 +2,6 @@ package org.vianden;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
@@ -22,9 +17,10 @@ import org.vianden.model.Author;
 import org.vianden.model.DatabaseType;
 import org.vianden.model.Paper;
 
-
 public class SearchEngine 
 {
+	private BufferedReader br;
+
 	/**
 	 * Based on the res/dblp.config, to crawl all the papers relating to the given venues (conferences or journals).
 	 * 
@@ -43,7 +39,7 @@ public class SearchEngine
 		List<Paper> paperlist = new ArrayList<Paper>();
 		//read paper sites from config file to paperlist
 		FileReader reader = new FileReader(System.getProperty("user.dir") + "/res/dblp.config");
-		BufferedReader br = new BufferedReader(reader);
+		br = new BufferedReader(reader);
 		String str = null;
 		while((str = br.readLine()) !=null){
 			System.out.println(str);
@@ -552,58 +548,5 @@ public class SearchEngine
 		
 		return list;
 	}
-	
-//	/**
-//	 * Web request, to get the web page details of sites that prepared to be crawled
-//	 * 
-//	 * @param url
-//	 * @return the html of the url
-//	 */
-//	private String getHtml(String url) throws Exception {
-//        URL localURL = new URL(url);
-//        URLConnection connection = localURL.openConnection();
-//        HttpURLConnection httpURLConnection = (HttpURLConnection)connection;
-//        
-//        httpURLConnection.setRequestProperty("Accept-Charset", "utf-8");
-//        httpURLConnection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
-//        
-//        InputStream inputStream = null;
-//        InputStreamReader inputStreamReader = null;
-//        BufferedReader reader = null;
-//        StringBuffer resultBuffer = new StringBuffer();
-//        String tempLine = null;
-//        
-//        if (httpURLConnection.getResponseCode() >= 300) {
-//            
-//        	throw new Exception("HTTP Request is not success, Response code is " + httpURLConnection.getResponseCode());
-////        	return null;
-//        }
-//        
-//        try {
-//            inputStream = httpURLConnection.getInputStream();
-//            inputStreamReader = new InputStreamReader(inputStream);
-//            reader = new BufferedReader(inputStreamReader);
-//            
-//            while ((tempLine = reader.readLine()) != null) {
-//                resultBuffer.append(tempLine);
-//            }
-//            
-//        } finally {
-//            
-//            if (reader != null) {
-//                reader.close();
-//            }
-//            
-//            if (inputStreamReader != null) {
-//                inputStreamReader.close();
-//            }
-//            
-//            if (inputStream != null) {
-//                inputStream.close();
-//            }
-//            
-//        }
-//        
-//        return resultBuffer.toString();
-//    }
+
 }
