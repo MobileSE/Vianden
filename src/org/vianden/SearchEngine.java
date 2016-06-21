@@ -19,7 +19,7 @@ import org.vianden.model.Paper;
 
 public class SearchEngine 
 {
-	private BufferedReader br;
+	private BufferedReader br = null;
 
 	/**
 	 * Based on the res/dblp.config, to crawl all the papers relating to the given venues (conferences or journals).
@@ -73,7 +73,7 @@ public class SearchEngine
 								String url = a.attr("href");
 								System.out.println("url:"+url);
 								//get papers of each journals and add to papaer list
-								List<Paper> list = this.getPaper(url, "article", venue);
+								List<Paper> list = this.getPapers(url, "article", venue);
 								paperlist.addAll(list);
 							}
 							continue;
@@ -99,7 +99,7 @@ public class SearchEngine
 					if(year>=startingYear){
 						System.out.println("year:"+year+",confUrl:"+cUrl);
 						//get papers of each conference and add to papaer list
-						List<Paper> list = this.getPaper(cUrl, "inproceedings", venue);
+						List<Paper> list = this.getPapers(cUrl, "inproceedings", venue);
 						paperlist.addAll(list);
 					}
 				}
@@ -491,7 +491,7 @@ public class SearchEngine
 	 * @return the papers list of the single journal or conference
 	 * @throws Exception
 	 */
-	private List<Paper> getPaper(String url, String type, String venue) throws Exception{
+	private List<Paper> getPapers(String url, String type, String venue) throws Exception{
 		List<Paper> list = new ArrayList<Paper>();
 	
 		Document doc = Jsoup.connect(url).userAgent("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_5) AppleWebKit/601.6.17 (KHTML, like Gecko) Version/9.1.1 Safari/601.6.17")
@@ -544,6 +544,9 @@ public class SearchEngine
 			paper.setpDoi(doi);
 			paper.setpVenue(venue);
 			paper.setpDatabaseType(dbtype);
+			
+			//add paper to list
+			list.add(paper);
 		}
 		
 		return list;
