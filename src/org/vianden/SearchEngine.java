@@ -287,14 +287,12 @@ public class SearchEngine
 				}
 				//references
 				reference = new ArrayList<String>();
-				Element refs = doc.getElementById("abstract-references");
-				if(refs != null){
-					Elements lis = refs.getElementsByClass("Citation");
-					for(Element li:lis){
-						String refstr = li.text();
-						reference.add(refstr);
-					}
+				Elements lis = doc.getElementsByClass("Citation");
+				for(Element li:lis){
+					String refstr = li.text();
+					reference.add(refstr);
 				}
+				
 			}
 			break;
 		case DatabaseType.ELSEVIER:
