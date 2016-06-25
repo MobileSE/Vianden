@@ -13,6 +13,14 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import org.vianden.crawler.ACMCrawler;
+import org.vianden.crawler.AbstractCrawler;
+import org.vianden.crawler.ElsevierCrawler;
+import org.vianden.crawler.IEEECrawler;
+import org.vianden.crawler.IETCrawler;
+import org.vianden.crawler.SpringerCrawler;
+import org.vianden.crawler.USENIXCrawler;
+import org.vianden.crawler.WileyCrawler;
 import org.vianden.model.Author;
 import org.vianden.model.DatabaseType;
 import org.vianden.model.Paper;
@@ -119,364 +127,40 @@ public class SearchEngine
 	 */
 	public Paper refine(Paper paper) throws Exception
 	{	
-		String abstractStr ="";
-		String keywordsStr = "";
-		String emailStr ="";
-		String pdfUrlStr = "";
-		int firstPage = 0;
-		int lastPage = 0;
-		int pages = 0;
-		List<String> reference = null;
-		List<Author> authors = new ArrayList<Author>();
-		
-		Document doc = Jsoup.connect(paper.getpDoi()).userAgent("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_5) AppleWebKit/601.6.17 (KHTML, like Gecko) Version/9.1.1 Safari/601.6.17")
-				.timeout(20000).get();
-		
-		Elements metaEles = doc.getElementsByTag("meta");
-		for(int i=0; i< metaEles.size(); ++i){
-			Element ele = metaEles.get(i);
-			String name = ele.attr("name");
-			if(name.equals("citation_keywords")){	//keywords:IEEE,IET,ACM
-				keywordsStr = ele.attr("content");
-				keywordsStr = keywordsStr.replaceAll("\t|\r|\n", "");
-			}else if(name.equals("citation_author_email")){	//email:IEEE, Springer
-				emailStr += ele.attr("content") + ";";
-			}else if(name.equals("citation_pdf_url")){	//pdf:IEEE, Springer, USENIX, ACM
-				pdfUrlStr = ele.attr("content");
-			}else if(name.equals("citation_abstract")){ //citation_abstract:IET
-				abstractStr = ele.attr("content");
-			}else if(name.equals("citation_firstpage")){
-				firstPage = Integer.valueOf(ele.attr("content")); //firstPage:IEEE, Springer, USENIX, Willy, IET, ACM
-			}else if(name.equals("citation_lastpage")){
-				lastPage = Integer.valueOf(ele.attr("content")); //lastPage:IEEE, Springer, USENIX, Willy, IET
-			}else if(name.equals("citation_author")){	//authors:IEEE, Springer, Willy, IET
-				//define informations of author
-				String authorName = ele.attr("content");
-				Set<String> authorInstitutionSet  = new HashSet<String>();
-				//get affiliations
-				for(int j=i+1; j<metaEles.size(); ++j){
-					Element eleInstitution = metaEles.get(j);
-					if(eleInstitution!=null && eleInstitution.attr("name").equals("citation_author_institution")){
-						authorInstitutionSet.add(eleInstitution.attr("content"));
-					}else{
-						break;
-					}
-				}
-				//construct author
-				Author author = new Author(authorName, authorInstitutionSet);
-				authors.add(author);
-			}
-		}
-		
-		if(firstPage!=0 && lastPage!=0){
-			pages = lastPage - firstPage + 1;
-		}else if(firstPage!=0 || lastPage!=0){
-			pages = 1;
-		}
+		AbstractCrawler absCrawler = null;
 		
 		switch (paper.getpDatabaseType())
 		{
 		case DatabaseType.ACM:
-			//authors
-			Element table = doc.getElementById("divmain").getElementsByTag("table").get(2);
-			Elements trs = table.getElementsByTag("tr");
-			for(Element tr : trs){
-				Elements tds = tr.getElementsByTag("td");
-				String name = tds.get(1).text();
-				Set<String> authorInstitutionSet  = new HashSet<String>();
-				if(tds.size() > 2){
-					for(int i=2; i<tds.size(); ++i){
-						authorInstitutionSet.add(tds.get(i).text());
-					}
-				}
-				//construct author add to authors list
-				Author author = new Author(name, authorInstitutionSet);
-				authors.add(author);
-			}
-			//get the destination of script
-			Elements scripts = doc.getElementsByTag("script");
-			String desStr = null;
-			for(Element script:scripts){
-				if(script.toString().contains("initializeTabLayout")){
-					desStr = script.toString();
-					break;
-				}
-			}
-			//abstract, references
-			if(desStr != null){
-				String prefix = "http://dl.acm.org/";
-				String absStartStr = "'bindTo':'abstract','bindExpr':['";
-				String refStartStr = "'bindTo':'references','bindExpr':['";	
-				String endStr = "']},ColdFusion.Bind.urlBindHandler,true);";
-				//abstract suffix
-				int absstart = desStr.indexOf(absStartStr) + absStartStr.length();
-				int absend = desStr.indexOf(endStr);
-				String abssuffix = desStr.substring(absstart, absend);
-				
-				//direct to referenes
-				desStr = desStr.substring(absend + endStr.length());
-				desStr = desStr.substring(desStr.indexOf(endStr) + endStr.length());
-				
-				//references suffix 
-				int refstart = desStr.indexOf(refStartStr) + refStartStr.length();
-				int refend = desStr.indexOf(endStr);
-				String refsuffix = desStr.substring(refstart, refend);
-				
-				//get abstract
-				Elements ps = Jsoup.connect(prefix + abssuffix).userAgent("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_5) AppleWebKit/601.6.17 (KHTML, like Gecko) Version/9.1.1 Safari/601.6.17")
-						.timeout(10000).get().getElementsByTag("p");
-				if(ps.size()>0){
-					abstractStr = ps.first().text();
-				}
-				System.out.println(abssuffix);
-				System.out.println(refsuffix);
-				
-				//get references
-				reference = new ArrayList<String>();
-				Elements acmrefs = Jsoup.connect(prefix + refsuffix).userAgent("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_5) AppleWebKit/601.6.17 (KHTML, like Gecko) Version/9.1.1 Safari/601.6.17")
-						.timeout(10000).get().getElementsByTag("tr");
-				if(acmrefs != null){
-					for(Element tr : acmrefs){
-						Element td = tr.getElementsByTag("td").get(2);
-						reference.add(td.text());
-					}
-				}else{
-					System.out.println("ref null");
-				}
-				
-			}
-//			System.out.println(table.toString());
+			absCrawler = new ACMCrawler(paper);
 			break;
 		case DatabaseType.IEEE:
-			//abstract
-			Element ieee = doc.select("div.article").first();
-			abstractStr = ieee.text();
-			//references
-			reference = new ArrayList<String>();
-			Element ref = doc.getElementById("abstract-references-tab");
-			//can not get absolute address via .attr("abs:href")
-			String refurl = "http://ieeexplore.ieee.org" + ref.attr("href"); 
-			
-			Document redoc = Jsoup.connect(refurl).userAgent("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_5) AppleWebKit/601.6.17 (KHTML, like Gecko) Version/9.1.1 Safari/601.6.17")
-					.timeout(10000).get();
-			Elements docsClass = redoc.getElementsByClass("docs");
-			if(docsClass!=null && docsClass.size()>0){
-				Element docs = docsClass.first();
-				Elements refs = docs.getElementsByTag("li");
-				for(Element li : refs){
-					String refstr = li.text();
-					reference.add(refstr);
-				}
-			}
+			absCrawler = new IEEECrawler(paper);
 			break;
 		case DatabaseType.SPRINGER:
-			Element springer = doc.getElementById("Abs1");
-			if(springer!=null){
-				//abstract
-				Element absEle = springer.select("p.Para").first();
-				abstractStr= absEle.text();
-				//keywords
-				Element keyGroupEle = doc.select("div.KeywordGroup").first();
-				if(keyGroupEle != null){
-					Elements keyEles = keyGroupEle.getElementsByClass("Keyword");
-	    			
-	    			for(Element keyword : keyEles){
-	    				String kw = keyword.text()+";";
-	    				keywordsStr += kw;
-	    			}
-				}
-				//references
-				reference = new ArrayList<String>();
-				Elements lis = doc.getElementsByClass("Citation");
-				for(Element li:lis){
-					String refstr = li.text();
-					reference.add(refstr);
-				}
-				
-			}
+			absCrawler = new SpringerCrawler(paper);
 			break;
 		case DatabaseType.ELSEVIER:
-			//keywords
-			Element keywordsElsvier = doc.getElementsByClass("keyword").first();
-			keywordsStr = keywordsElsvier.text();
-			//abstract
-			Element absElsvier = doc.select(".abstract").select(".svAbstract").get(1).getElementsByTag("p").first();
-			abstractStr = absElsvier.text();
-			//affiliations
-			HashMap<String, String> affMap = new HashMap<String, String>();
-			Element affiliations = doc.select(".affiliation").select(".authAffil").first();
-			System.out.println(affiliations.text());
-			Elements afflis = affiliations.getElementsByTag("li");
-			for(Element affli:afflis){
-				String tag = affli.getElementsByTag("sup").first().text();
-				String affName = affli.getElementsByTag("span").first().text();
-				affMap.put(tag, affName);
-			}
-			//authors
-			Element authorElsvier = doc.select(".authorGroup.noCollab.svAuthor").first();
-			Elements authorElsvierLis = authorElsvier.getElementsByTag("li");
-			for(Element li : authorElsvierLis){
-				String authorName = li.select(".authorName.svAuthor").first().text();
-				//get author affiliations
-				Set<String> authorInstitutionSet  = new HashSet<String>();
-				Elements affs = li.select(".intra_ref.auth_aff");
-				for(Element aff : affs){
-					String tag = aff.text();
-					String institution = affMap.get(tag);
-					authorInstitutionSet.add(institution);
-				}
-				//add to authors
-				Author author = new Author(authorName, authorInstitutionSet);
-				authors.add(author);
-				
-				//Email
-				Elements emailAs = li.getElementsByClass("auth_mail");
-				for(int i=0; i<emailAs.size(); ++i){
-					Element email = emailAs.get(i);
-					emailStr+=email.attr("href").replace("mailto:", "") + ";";
-				}
-			}
-			//pdfStr
-			pdfUrlStr = doc.getElementById("pdfLink").attr("pdfurl");
-			//pages
-			Element volIssue = doc.getElementsByClass("volIssue").first();
-			String volStr[] = volIssue.text().split(",");
-			String pageStr[] = null;
-			for(String str : volStr){
-				if(str.contains("Pages")){
-					str = str.trim();
-					pageStr = str.substring(5).split("–");
-				}
-			}
-			
-			if(pageStr != null){
-				if(pageStr.length == 2){
-					pages = Integer.valueOf(pageStr[1].trim()) - Integer.valueOf(pageStr[0].trim()) + 1;
-				}else if(pageStr.length == 1){
-					pages = 1;
-				}
-			}
-			//no references
+			absCrawler = new ElsevierCrawler(paper);
 			break;
 		case DatabaseType.WILEY:
-			//keywords
-			Element keylist = doc.getElementById("abstractKeywords1");
-			Elements lis = keylist.getElementsByTag("li");
-			for(Element li : lis){
-				keywordsStr += li.text();
-			}
-			//abstract
-			Element absWilly = doc.getElementById("abstract");
-			Elements ps = absWilly.getElementsByTag("p");
-			abstractStr = "";
-			for(Element p : ps){
-				abstractStr += p.text();
-			}
-			//references
-			Element refWiley = doc.select(".tabbedContent").first().getElementsByTag("a").get(1);
-			//can not get absolute address via .attr("abs:href")
-			String refWileyUrl = "http://onlinelibrary.wiley.com" + refWiley.attr("href");
-			Document reWileyDoc = Jsoup.connect(refWileyUrl).userAgent("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_5) AppleWebKit/601.6.17 (KHTML, like Gecko) Version/9.1.1 Safari/601.6.17")
-					.timeout(10000).get();
-			Elements refsWiley = reWileyDoc.getElementById("fulltext").getElementsByTag("cite");
-			reference = new ArrayList<String>();
-			for(Element refinfo : refsWiley){
-				reference.add(refinfo.text());
-			}
-			
+			absCrawler = new WileyCrawler(paper);
 			break;
 		case DatabaseType.USENIX:
-			Elements usenix = doc.select(".field.field-name-field-paper-description.field-type-text-long.field-label-above")
-			.select(".field-items");
-			if(usenix != null){
-				//abstract
-				Element absUsenix = usenix.first();
-				abstractStr = absUsenix.text();
-				//no reference and keywords
-			}
+			absCrawler = new USENIXCrawler(paper);
 			break;
 		case DatabaseType.IET:
-			Elements as = doc.getElementsByTag("a");
-			//iet database url
-			String ieturl = as.get(2).attr("href");
-			//refine by iet database
-			Document ietdoc = Jsoup.connect(ieturl).userAgent("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_5) AppleWebKit/601.6.17 (KHTML, like Gecko) Version/9.1.1 Safari/601.6.17")
-					.timeout(20000).get();
-			Elements ietmetaEles = ietdoc.getElementsByTag("meta");
-			for(int i=0; i< ietmetaEles.size(); ++i){
-				Element ele = ietmetaEles.get(i);
-				String name = ele.attr("name");
-				if(name.equals("citation_keywords")){	//keywords
-					keywordsStr = ele.attr("content");
-					keywordsStr = keywordsStr.replaceAll("\t|\r|\n", "");
-				}else if(name.equals("citation_author_email")){	//email
-					emailStr += ele.attr("content") + ";";
-				}else if(name.equals("citation_abstract")){ //abstract
-					abstractStr = ele.attr("content");
-				}else if(name.equals("citation_firstpage")){
-					firstPage = Integer.valueOf(ele.attr("content")); //firstPage
-				}else if(name.equals("citation_lastpage")){
-					lastPage = Integer.valueOf(ele.attr("content")); //lastPage:
-				}else if(name.equals("citation_author")){	//authors
-					//define informations of author
-					String authorName = ele.attr("content");
-					Set<String> authorInstitutionSet  = new HashSet<String>();
-					//get affiliations
-					for(int j=i+1; j<metaEles.size(); ++j){
-						Element eleInstitution = metaEles.get(j);
-						if(eleInstitution!=null && eleInstitution.attr("name").equals("citation_author_institution")){
-							authorInstitutionSet.add(eleInstitution.attr("content"));
-						}else{
-							break;
-						}
-					}
-					//construct author
-					Author author = new Author(authorName, authorInstitutionSet);
-					authors.add(author);
-				}
-			}
-			
-			//set pages
-			if(firstPage!=0 && lastPage!=0){
-				pages = lastPage - firstPage + 1;
-			}
-			
-			//get references
-			Elements reflis = ietdoc.getElementsByClass("refdetail");
-			reference = new ArrayList<String>();
-			for(Element refli : reflis){
-				reference.add(refli.text());
-			}
-			
-			//ieee database url to get pdf
-			//refine by ieee database
-			String ieeeurl = as.get(3).attr("href");
-			Document ieeedoc = Jsoup.connect(ieeeurl).userAgent("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_5) AppleWebKit/601.6.17 (KHTML, like Gecko) Version/9.1.1 Safari/601.6.17")
-					.timeout(10000).get();
-			Elements ieeemetaEles = ieeedoc.getElementsByTag("meta");
-			for(int i=0; i< ieeemetaEles.size(); ++i){
-				Element ele = ieeemetaEles.get(i);
-				String name = ele.attr("name");
-				if(name.equals("citation_author_email")){	//email
-					emailStr += ele.attr("content") + ";";
-				}else if(name.equals("citation_pdf_url")){	//pdf
-					pdfUrlStr = ele.attr("content");
-				}
-			}
+			absCrawler = new IETCrawler(paper);
 			break;
 		default:
 			break;
 		}
 		
-		//set paper's informations
-		paper.setpAbstract(abstractStr);
-		paper.setpEmail(emailStr);
-		paper.setpKeywords(keywordsStr);
-		paper.setpPdfUrl(pdfUrlStr);
-		paper.setpPages(String.valueOf(pages));
-		paper.setpReferences(reference);
-		if(authors.size()>0){
-			paper.setpAuthors(authors);
+		if(absCrawler!=null){
+			//crawling
+			absCrawler.crawl();
+			//set data to paper
+			paper = absCrawler.FinishCrawl();
 		}
 		
 		return paper;

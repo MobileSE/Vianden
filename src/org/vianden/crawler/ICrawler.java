@@ -1,8 +1,8 @@
 package org.vianden.crawler;
 
-import org.vianden.model.Paper;
+import java.io.IOException;
 
 public interface ICrawler 
 {
-	public Paper crawl();
+	public void crawl() throws IOException;
 }
