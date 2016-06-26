@@ -1,7 +1,6 @@
 package org.vianden.crawler;
 
 import java.io.IOException;
-import java.util.ArrayList;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -23,6 +22,7 @@ public class WileyCrawler extends AbstractCrawler {
 		for(Element li : lis){
 			keywordsStr += li.text();
 		}
+		
 		//abstract
 		Element absWilly = doc.getElementById("abstract");
 		Elements ps = absWilly.getElementsByTag("p");
@@ -30,6 +30,7 @@ public class WileyCrawler extends AbstractCrawler {
 		for(Element p : ps){
 			abstractStr += p.text();
 		}
+		
 		//references
 		Element refWiley = doc.select(".tabbedContent").first().getElementsByTag("a").get(1);
 		//can not get absolute address via .attr("abs:href")
@@ -37,7 +38,7 @@ public class WileyCrawler extends AbstractCrawler {
 		Document reWileyDoc = Jsoup.connect(refWileyUrl).userAgent("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_5) AppleWebKit/601.6.17 (KHTML, like Gecko) Version/9.1.1 Safari/601.6.17")
 				.timeout(10000).get();
 		Elements refsWiley = reWileyDoc.getElementById("fulltext").getElementsByTag("cite");
-		reference = new ArrayList<String>();
+		
 		for(Element refinfo : refsWiley){
 			reference.add(refinfo.text());
 		}

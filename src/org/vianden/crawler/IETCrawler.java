@@ -1,7 +1,6 @@
 package org.vianden.crawler;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -68,7 +67,6 @@ public class IETCrawler extends AbstractCrawler {
 		
 		//get references
 		Elements reflis = ietdoc.getElementsByClass("refdetail");
-		reference = new ArrayList<String>();
 		for(Element refli : reflis){
 			reference.add(refli.text());
 		}

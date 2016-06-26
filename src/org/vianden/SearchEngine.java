@@ -160,7 +160,7 @@ public class SearchEngine
 			//crawling
 			absCrawler.crawl();
 			//set data to paper
-			paper = absCrawler.FinishCrawl();
+			absCrawler.FinishCrawl();
 		}
 		
 		return paper;

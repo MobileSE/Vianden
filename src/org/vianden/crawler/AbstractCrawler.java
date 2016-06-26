@@ -35,11 +35,18 @@ public abstract class AbstractCrawler implements ICrawler
 	
 	public AbstractCrawler(Paper paper) throws IOException
 	{
+		//initialize
 		this.paper = paper;
-		
 		authors = new ArrayList<Author>();
+		reference = new ArrayList<String>();
 		
-		doc = Jsoup.connect(paper.getpDoi()).userAgent("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_5) AppleWebKit/601.6.17 (KHTML, like Gecko) Version/9.1.1 Safari/601.6.17")
+		//common part crawl
+		this.commonCrawl();
+	}
+	
+	private void commonCrawl() throws IOException{
+		doc = Jsoup.connect(paper.getpDoi())
+				.userAgent("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_5) AppleWebKit/601.6.17 (KHTML, like Gecko) Version/9.1.1 Safari/601.6.17")
 				.timeout(20000).get();
 		
 		Elements metaEles = doc.getElementsByTag("meta");
@@ -85,7 +92,7 @@ public abstract class AbstractCrawler implements ICrawler
 		}
 	}
 	
-	public Paper FinishCrawl(){
+	public void FinishCrawl(){
 		//set paper's informations
 		paper.setpAbstract(abstractStr);
 		paper.setpEmail(emailStr);
@@ -97,6 +104,5 @@ public abstract class AbstractCrawler implements ICrawler
 			paper.setpAuthors(authors);
 		}
 		
-		return paper;
 	}
 }

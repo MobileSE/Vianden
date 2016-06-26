@@ -1,7 +1,6 @@
 package org.vianden.crawler;
 
 import java.io.IOException;
-import java.util.ArrayList;
 
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
@@ -31,7 +30,6 @@ public class SpringerCrawler extends AbstractCrawler {
     			}
 			}
 			//references
-			reference = new ArrayList<String>();
 			Elements lis = doc.getElementsByClass("Citation");
 			for(Element li:lis){
 				String refstr = li.text();

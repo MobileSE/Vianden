@@ -1,7 +1,6 @@
 package org.vianden.crawler;
 
 import java.io.IOException;
-import java.util.ArrayList;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -23,7 +22,6 @@ public class IEEECrawler extends AbstractCrawler
 		Element ieee = doc.select("div.article").first();
 		abstractStr = ieee.text();
 		//references
-		reference = new ArrayList<String>();
 		Element ref = doc.getElementById("abstract-references-tab");
 		//can not get absolute address via .attr("abs:href")
 		String refurl = "http://ieeexplore.ieee.org" + ref.attr("href"); 

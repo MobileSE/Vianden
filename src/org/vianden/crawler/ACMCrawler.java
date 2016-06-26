@@ -1,7 +1,6 @@
 package org.vianden.crawler;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -74,7 +73,6 @@ public class ACMCrawler extends AbstractCrawler {
 			System.out.println(refsuffix);
 			
 			//get references
-			reference = new ArrayList<String>();
 			Elements acmrefs = Jsoup.connect(prefix + refsuffix).userAgent("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_5) AppleWebKit/601.6.17 (KHTML, like Gecko) Version/9.1.1 Safari/601.6.17")
 					.timeout(10000).get().getElementsByTag("tr");
 			if(acmrefs != null){
