@@ -105,4 +105,10 @@ public abstract class AbstractCrawler implements ICrawler
 		}
 		
 	}
+
+	@Override
+	public Paper getPaper() 
+	{
+		return paper;
+	}
 }

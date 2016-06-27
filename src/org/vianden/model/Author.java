@@ -4,8 +4,8 @@ import java.util.Set;
 
 public class Author 
 {
-	public String name;
-	public Set<String> affiliation;    //one author may have multiple affiliation
+	private String name;
+	private Set<String> affiliation;    //one author may have multiple affiliation
 	
 	public Author(String name, Set<String> affiliation)
 	{
@@ -20,5 +20,21 @@ public class Author
 			afStr += str + ";";
 		}
 		return "author name:"+ name + ", affiliation:" + afStr;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public Set<String> getAffiliation() {
+		return affiliation;
+	}
+
+	public void setAffiliation(Set<String> affiliation) {
+		this.affiliation = affiliation;
 	}
 }
