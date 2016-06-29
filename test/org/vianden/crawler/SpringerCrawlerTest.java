@@ -10,50 +10,53 @@ import org.junit.Test;
 import org.vianden.model.DatabaseType;
 import org.vianden.model.Paper;
 
-public class IEEECrawlerTest 
-{
+public class SpringerCrawlerTest {
+	
 	private static AbstractCrawler crawler = null;
 	private static Paper paper = null;
 	private static String tAbstract = null;
+	private static String tEmail = null;
 	private static String tKeywords = null;
 	private static String tPdfurl = null;
 	private static String tPages = null;
 	private static String tReferences = null;
 	private static String tAuthors = null;
-	
+
 	@BeforeClass
-	public static void setUp() throws Exception {
+	public static void setUpBeforeClass() throws Exception {
 		//read test case
 		Properties pp = new Properties();
 		pp.load(IEEECrawlerTest.class.getClassLoader().getResourceAsStream("org/vianden/crawler/CrawlTestCase.properties"));
-		tAbstract=pp.getProperty("abstractIEEE");
-		tKeywords=pp.getProperty("keywordsIEEE");
-		tPdfurl=pp.getProperty("pdfurlIEEE");
-		tPages=pp.getProperty("pagesIEEE");
-		tReferences=pp.getProperty("referencesIEEE");
-		tAuthors=pp.getProperty("authorsIEEE");
+		tAbstract=pp.getProperty("abstractSpringer");
+		tEmail=pp.getProperty("emailSpringer");
+		tKeywords=pp.getProperty("keywordsSpringer");
+		tPdfurl=pp.getProperty("pdfurlSpringer");
+		tPages=pp.getProperty("pagesSpringer");
+		tReferences=pp.getProperty("referencesSpringer");
+		tAuthors=pp.getProperty("authorsSpringer");
 		
 		//construct paper
-		String urlIeee = pp.getProperty("urlIeee");
+		String urlSpringer = pp.getProperty("urlSpringer");
 		paper = new Paper();
-		paper.setpDoi(urlIeee);
-		paper.setpDatabaseType(DatabaseType.IEEE);
+		paper.setpDoi(urlSpringer);
+		paper.setpDatabaseType(DatabaseType.SPRINGER);
 		
 		//initialize crawler
-		crawler = new IEEECrawler(paper);
+		crawler = new SpringerCrawler(paper);
 	}
-	
+
 	@Test
-	public void testCrawl() throws IOException
-	{
+	public void testCrawl() throws IOException {
 		crawler.crawl();
 		crawler.FinishCrawl();
 		
 		assertEquals(tAbstract, paper.getpAbstract());
+		assertEquals(tEmail, paper.getpEmail());
 		assertEquals(tKeywords, paper.getpKeywords());
 		assertEquals(tPdfurl, paper.getpPdfUrl());
 		assertEquals(tPages, paper.getpPages());
 		assertEquals(tReferences, paper.getpReferences().toString());
 		assertEquals(tAuthors, paper.getpAuthors().toString());
 	}
+
 }

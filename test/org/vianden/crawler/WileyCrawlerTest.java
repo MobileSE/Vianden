@@ -10,8 +10,8 @@ import org.junit.Test;
 import org.vianden.model.DatabaseType;
 import org.vianden.model.Paper;
 
-public class IEEECrawlerTest 
-{
+public class WileyCrawlerTest {
+	
 	private static AbstractCrawler crawler = null;
 	private static Paper paper = null;
 	private static String tAbstract = null;
@@ -20,32 +20,31 @@ public class IEEECrawlerTest
 	private static String tPages = null;
 	private static String tReferences = null;
 	private static String tAuthors = null;
-	
+
 	@BeforeClass
-	public static void setUp() throws Exception {
+	public static void setUpBeforeClass() throws Exception {
 		//read test case
 		Properties pp = new Properties();
 		pp.load(IEEECrawlerTest.class.getClassLoader().getResourceAsStream("org/vianden/crawler/CrawlTestCase.properties"));
-		tAbstract=pp.getProperty("abstractIEEE");
-		tKeywords=pp.getProperty("keywordsIEEE");
-		tPdfurl=pp.getProperty("pdfurlIEEE");
-		tPages=pp.getProperty("pagesIEEE");
-		tReferences=pp.getProperty("referencesIEEE");
-		tAuthors=pp.getProperty("authorsIEEE");
+		tAbstract=pp.getProperty("abstractWiley");
+		tKeywords=pp.getProperty("keywordsWiley");
+		tPdfurl=pp.getProperty("pdfurlWiley");
+		tPages=pp.getProperty("pagesWiley");
+		tReferences=pp.getProperty("referencesWiley");
+		tAuthors=pp.getProperty("authorsWiley");
 		
 		//construct paper
-		String urlIeee = pp.getProperty("urlIeee");
+		String urlWiley = pp.getProperty("urlWiley");
 		paper = new Paper();
-		paper.setpDoi(urlIeee);
-		paper.setpDatabaseType(DatabaseType.IEEE);
+		paper.setpDoi(urlWiley);
+		paper.setpDatabaseType(DatabaseType.ACM);
 		
 		//initialize crawler
-		crawler = new IEEECrawler(paper);
+		crawler = new WileyCrawler(paper);
 	}
-	
+
 	@Test
-	public void testCrawl() throws IOException
-	{
+	public void testCrawl() throws IOException {
 		crawler.crawl();
 		crawler.FinishCrawl();
 		
@@ -56,4 +55,5 @@ public class IEEECrawlerTest
 		assertEquals(tReferences, paper.getpReferences().toString());
 		assertEquals(tAuthors, paper.getpAuthors().toString());
 	}
+
 }

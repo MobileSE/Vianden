@@ -94,11 +94,11 @@ public abstract class AbstractCrawler implements ICrawler
 	
 	public void FinishCrawl(){
 		//set paper's informations
-		paper.setpAbstract(abstractStr);
-		paper.setpEmail(emailStr);
-		paper.setpKeywords(keywordsStr);
-		paper.setpPdfUrl(pdfUrlStr);
-		paper.setpPages(String.valueOf(pages));
+		paper.setpAbstract(abstractStr.trim());
+		paper.setpEmail(emailStr.trim());
+		paper.setpKeywords(keywordsStr.trim());
+		paper.setpPdfUrl(pdfUrlStr.trim());
+		paper.setpPages(String.valueOf(pages).trim());
 		paper.setpReferences(reference);
 		if(authors.size()>0){
 			paper.setpAuthors(authors);
