@@ -1,59 +1,42 @@
 package org.vianden.crawler;
 
-import static org.junit.Assert.*;
-
 import java.io.IOException;
-import java.util.Properties;
 
-import org.junit.BeforeClass;
+import org.junit.Assert;
 import org.junit.Test;
-import org.vianden.model.DatabaseType;
 import org.vianden.model.Paper;
 
 public class IEEECrawlerTest 
 {
-	private static AbstractCrawler crawler = null;
-	private static Paper paper = null;
-	private static String tAbstract = null;
-	private static String tKeywords = null;
-	private static String tPdfurl = null;
-	private static String tPages = null;
-	private static String tReferences = null;
-	private static String tAuthors = null;
-	
-	@BeforeClass
-	public static void setUp() throws Exception {
-		//read test case
-		Properties pp = new Properties();
-		pp.load(IEEECrawlerTest.class.getClassLoader().getResourceAsStream("org/vianden/crawler/CrawlTestCase.properties"));
-		tAbstract=pp.getProperty("abstractIEEE");
-		tKeywords=pp.getProperty("keywordsIEEE");
-		tPdfurl=pp.getProperty("pdfurlIEEE");
-		tPages=pp.getProperty("pagesIEEE");
-		tReferences=pp.getProperty("referencesIEEE");
-		tAuthors=pp.getProperty("authorsIEEE");
-		
-		//construct paper
-		String urlIeee = pp.getProperty("urlIeee");
-		paper = new Paper();
-		paper.setpDoi(urlIeee);
-		paper.setpDatabaseType(DatabaseType.IEEE);
-		
-		//initialize crawler
-		crawler = new IEEECrawler(paper);
-	}
-	
 	@Test
-	public void testCrawl() throws IOException
+	public void testCrawl()
 	{
-		crawler.crawl();
-		crawler.FinishCrawl();
+		String doi = "http://dx.doi.org/10.1109/ICSE.2015.30";
 		
-		assertEquals(tAbstract, paper.getpAbstract());
-		assertEquals(tKeywords, paper.getpKeywords());
-		assertEquals(tPdfurl, paper.getpPdfUrl());
-		assertEquals(tPages, paper.getpPages());
-		assertEquals(tReferences, paper.getpReferences().toString());
-		assertEquals(tAuthors, paper.getpAuthors().toString());
+		Paper paper = new Paper();
+		paper.setpDoi(doi);
+		
+		try {
+			AbstractCrawler crawler = new IEEECrawler(paper);
+			crawler.crawl();
+			
+			paper = crawler.getPaper();
+		} catch (IOException e) {
+			e.printStackTrace();
+			
+			//Exception here is not expected.
+			Assert.fail();
+		}
+		
+		Assert.assertTrue("Composite Constant Propagation: Application to Android Inter-Component Communication Analysis".equalsIgnoreCase(paper.getpTitle()));
+		Assert.assertTrue("77 - 88".equals(paper.getpPages()));    //change pages from String to int
+		
+		Assert.assertEquals(5, paper.getpAuthors().size());
+		
+		Assert.assertTrue("Damien Octeau".equalsIgnoreCase(paper.getpAuthors().get(0).getName()));
+		Assert.assertTrue("Daniel Luchaup".equalsIgnoreCase(paper.getpAuthors().get(1).getName()));
+		Assert.assertTrue("Matthew Dering".equalsIgnoreCase(paper.getpAuthors().get(2).getName()));
+		Assert.assertTrue("Somesh Jha".equalsIgnoreCase(paper.getpAuthors().get(3).getName()));
+		Assert.assertTrue("Patrick McDaniel".equalsIgnoreCase(paper.getpAuthors().get(4).getName()));
 	}
 }

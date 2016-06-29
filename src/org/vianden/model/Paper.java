@@ -93,4 +93,39 @@ public class Paper
 	public void setpReferences(List<String> pReferences) {
 		this.pReferences = pReferences;
 	}
+	
+	@Override
+	public int hashCode() 
+	{
+		return toString().hashCode();
+	}
+	
+	@Override
+	public boolean equals(Object obj) 
+	{
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Paper other = (Paper) obj;
+		
+		if (pDoi == null) {
+			if (other.pDoi != null)
+				return false;
+		} else if (!pDoi.equals(other.pDoi))
+			return false;
+		
+		return true;
+	}
+	
+	@Override
+	public String toString() 
+	{
+		return "Paper [pTitle=" + pTitle + ", pAuthors=" + pAuthors + ", pYear=" + pYear + ", pDoi=" + pDoi
+				+ ", pVenue=" + pVenue + ", pDatabaseType=" + pDatabaseType + ", pAbstract=" + pAbstract + ", pPages="
+				+ pPages + ", pEmail=" + pEmail + ", pKeywords=" + pKeywords + ", pPdfUrl=" + pPdfUrl + ", pReferences="
+				+ pReferences + "]";
+	}
 }
