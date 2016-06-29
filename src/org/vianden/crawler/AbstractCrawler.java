@@ -22,9 +22,11 @@ import org.vianden.model.Paper;
 public abstract class AbstractCrawler implements ICrawler
 {
 	protected Paper paper = null;
-	protected String abstractStr ="";
+	protected String titileStr = "";
+	protected String abstractStr = "";
 	protected String keywordsStr = "";
-	protected String emailStr ="";
+	protected String venueStr = "";
+	protected String emailStr = "";
 	protected String pdfUrlStr = "";
 	protected int firstPage = 0;
 	protected int lastPage = 0;
@@ -53,10 +55,15 @@ public abstract class AbstractCrawler implements ICrawler
 		for(int i=0; i< metaEles.size(); ++i){
 			Element ele = metaEles.get(i);
 			String name = ele.attr("name");
-			if(name.equals("citation_keywords")){	//keywords:IEEE,IET,ACM
+			if(name.equals("citation_title")){
+				titileStr = ele.attr("content");
+			}else if(name.equals("citation_keywords")){	//keywords:IEEE,IET,ACM
 				keywordsStr = ele.attr("content");
 				keywordsStr = keywordsStr.replaceAll("\t|\r|\n", "");
+			}else if(name.equals("citation_journal_title") || name.equals("citation_conference")){
+				venueStr = ele.attr("content");
 			}else if(name.equals("citation_author_email")){	//email:IEEE, Springer
+			
 				emailStr += ele.attr("content") + ";";
 			}else if(name.equals("citation_pdf_url")){	//pdf:IEEE, Springer, USENIX, ACM
 				pdfUrlStr = ele.attr("content");
@@ -92,9 +99,11 @@ public abstract class AbstractCrawler implements ICrawler
 		}
 	}
 	
-	public void FinishCrawl(){
+	public void finishCrawl(){
 		//set paper's informations
+		paper.setpTitle(titileStr);
 		paper.setpAbstract(abstractStr.trim());
+		paper.setpVenue(venueStr);
 		paper.setpEmail(emailStr.trim());
 		paper.setpKeywords(keywordsStr.trim());
 		paper.setpPdfUrl(pdfUrlStr.trim());

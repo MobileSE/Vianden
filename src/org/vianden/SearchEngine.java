@@ -157,7 +157,7 @@ public class SearchEngine
 			//crawling
 			absCrawler.crawl();
 			//set data to paper
-			absCrawler.FinishCrawl();
+			absCrawler.finishCrawl();
 		}
 		
 		return paper;

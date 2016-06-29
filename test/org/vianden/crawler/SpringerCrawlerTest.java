@@ -48,7 +48,7 @@ public class SpringerCrawlerTest {
 	@Test
 	public void testCrawl() throws IOException {
 		crawler.crawl();
-		crawler.FinishCrawl();
+		crawler.finishCrawl();
 		
 		assertEquals(tAbstract, paper.getpAbstract());
 		assertEquals(tEmail, paper.getpEmail());

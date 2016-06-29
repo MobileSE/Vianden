@@ -42,7 +42,7 @@ public class USENIXCrawlerTest {
 	@Test
 	public void testCrawl() throws IOException {
 		crawler.crawl();
-		crawler.FinishCrawl();
+		crawler.finishCrawl();
 		
 		assertEquals(tAbstract, paper.getpAbstract());
 		assertEquals(tPdfurl, paper.getpPdfUrl());

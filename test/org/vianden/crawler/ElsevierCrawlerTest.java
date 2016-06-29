@@ -44,7 +44,7 @@ public class ElsevierCrawlerTest {
 	@Test
 	public void testCrawl() throws IOException {
 		crawler.crawl();
-		crawler.FinishCrawl();
+		crawler.finishCrawl();
 		
 		assertEquals(tAbstract, paper.getpAbstract());
 		assertEquals(tKeywords, paper.getpKeywords());
