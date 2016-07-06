@@ -7,7 +7,7 @@ import java.util.Properties;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.vianden.model.DatabaseType;
+import org.vianden.model.Publisher;
 import org.vianden.model.Paper;
 
 public class ElsevierCrawlerTest {
@@ -35,7 +35,7 @@ public class ElsevierCrawlerTest {
 		String urlElsevier = pp.getProperty("urlElsevier");
 		paper = new Paper();
 		paper.setpDoi(urlElsevier);
-		paper.setpDatabaseType(DatabaseType.ELSEVIER);
+		paper.setpDatabaseType(Publisher.ELSEVIER);
 		
 		//initialize crawler
 		crawler = new ElsevierCrawler(paper);

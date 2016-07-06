@@ -7,7 +7,7 @@ import java.util.Properties;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.vianden.model.DatabaseType;
+import org.vianden.model.Publisher;
 import org.vianden.model.Paper;
 
 public class IETCrawlerTest {
@@ -37,7 +37,7 @@ public class IETCrawlerTest {
 		String urlIET = pp.getProperty("urlIET");
 		paper = new Paper();
 		paper.setpDoi(urlIET);
-		paper.setpDatabaseType(DatabaseType.IET);
+		paper.setpDatabaseType(Publisher.IET);
 		
 		//initialize crawler
 		crawler = new IETCrawler(paper);

@@ -7,7 +7,7 @@ import java.util.Properties;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.vianden.model.DatabaseType;
+import org.vianden.model.Publisher;
 import org.vianden.model.Paper;
 
 public class USENIXCrawlerTest {
@@ -33,7 +33,7 @@ public class USENIXCrawlerTest {
 		String urlUSENIX = pp.getProperty("urlUSENIX");
 		paper = new Paper();
 		paper.setpDoi(urlUSENIX);
-		paper.setpDatabaseType(DatabaseType.USENIX);
+		paper.setpDatabaseType(Publisher.USENIX);
 		
 		//initialize crawler
 		crawler = new USENIXCrawler(paper);

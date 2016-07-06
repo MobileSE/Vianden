@@ -7,7 +7,7 @@ import java.util.Properties;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.vianden.model.DatabaseType;
+import org.vianden.model.Publisher;
 import org.vianden.model.Paper;
 
 public class SpringerCrawlerTest {
@@ -39,7 +39,7 @@ public class SpringerCrawlerTest {
 		String urlSpringer = pp.getProperty("urlSpringer");
 		paper = new Paper();
 		paper.setpDoi(urlSpringer);
-		paper.setpDatabaseType(DatabaseType.SPRINGER);
+		paper.setpDatabaseType(Publisher.SPRINGER);
 		
 		//initialize crawler
 		crawler = new SpringerCrawler(paper);

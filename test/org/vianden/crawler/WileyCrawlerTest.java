@@ -7,7 +7,7 @@ import java.util.Properties;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.vianden.model.DatabaseType;
+import org.vianden.model.Publisher;
 import org.vianden.model.Paper;
 
 public class WileyCrawlerTest {
@@ -37,7 +37,7 @@ public class WileyCrawlerTest {
 		String urlWiley = pp.getProperty("urlWiley");
 		paper = new Paper();
 		paper.setpDoi(urlWiley);
-		paper.setpDatabaseType(DatabaseType.ACM);
+		paper.setpDatabaseType(Publisher.ACM);
 		
 		//initialize crawler
 		crawler = new WileyCrawler(paper);

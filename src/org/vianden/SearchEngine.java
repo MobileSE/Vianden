@@ -19,7 +19,7 @@ import org.vianden.crawler.SpringerCrawler;
 import org.vianden.crawler.USENIXCrawler;
 import org.vianden.crawler.WileyCrawler;
 import org.vianden.model.Author;
-import org.vianden.model.DatabaseType;
+import org.vianden.model.Publisher;
 import org.vianden.model.Paper;
 
 public class SearchEngine 
@@ -128,25 +128,25 @@ public class SearchEngine
 		
 		switch (paper.getpDatabaseType())
 		{
-		case DatabaseType.ACM:
+		case Publisher.ACM:
 			absCrawler = new ACMCrawler(paper);
 			break;
-		case DatabaseType.IEEE:
+		case Publisher.IEEE:
 			absCrawler = new IEEECrawler(paper);
 			break;
-		case DatabaseType.SPRINGER:
+		case Publisher.SPRINGER:
 			absCrawler = new SpringerCrawler(paper);
 			break;
-		case DatabaseType.ELSEVIER:
+		case Publisher.ELSEVIER:
 			absCrawler = new ElsevierCrawler(paper);
 			break;
-		case DatabaseType.WILEY:
+		case Publisher.WILEY:
 			absCrawler = new WileyCrawler(paper);
 			break;
-		case DatabaseType.USENIX:
+		case Publisher.USENIX:
 			absCrawler = new USENIXCrawler(paper);
 			break;
-		case DatabaseType.IET:
+		case Publisher.IET:
 			absCrawler = new IETCrawler(paper);
 			break;
 		default:
@@ -198,19 +198,19 @@ public class SearchEngine
 			//get database type by doi number
 			int dbtype = -1;
 			if(doi.contains("10.1145")){
-				dbtype = DatabaseType.ACM;
+				dbtype = Publisher.ACM;
 			}else if (doi.contains("10.1109")){
-				dbtype = DatabaseType.IEEE;
+				dbtype = Publisher.IEEE;
 			}else if(doi.contains("10.1007")){
-				dbtype = DatabaseType.SPRINGER;
+				dbtype = Publisher.SPRINGER;
 			}else if(doi.contains("10.1016")){
-				dbtype = DatabaseType.ELSEVIER;
+				dbtype = Publisher.ELSEVIER;
 			}else if(doi.contains("10.1002")){
-				dbtype = DatabaseType.WILEY;
+				dbtype = Publisher.WILEY;
 			}else if(doi.contains("usenix")){
-				dbtype = DatabaseType.USENIX;
+				dbtype = Publisher.USENIX;
 			}else if(doi.contains("10.1049")){
-				dbtype = DatabaseType.IET;
+				dbtype = Publisher.IET;
 			}
 			
 			System.out.println("name:"+title+", year:"+year+",doi:"+doi);

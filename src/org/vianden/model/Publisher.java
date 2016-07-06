@@ -1,6 +1,6 @@
 package org.vianden.model;
 
-public class DatabaseType 
+public class Publisher 
 {
 	public static final int ACM = 1;
 	public static final int IEEE = 2;
