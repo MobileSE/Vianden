@@ -24,8 +24,9 @@ public class SearchEngineTest
 			
 			p = se.refine(p);
 			
-			System.out.println(p.getpAbstract());
-			System.out.println(p.getpAuthors());
+			System.out.println("--" + p.getpAbstract());
+			System.out.println("--" + p.getpAuthors());
+			System.out.println();
 			
 			break;
 		}
