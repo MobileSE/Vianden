@@ -5,7 +5,9 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -25,7 +27,7 @@ import org.vianden.model.Paper;
 
 public class SearchEngine {
 	private static final String USER_AGENT = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_5) AppleWebKit/601.6.17 (KHTML, like Gecko) Version/9.1.1 Safari/601.6.17";
-	private static final int TIME_OUT = 10000;
+	private static final int TIME_OUT = 100000;
 
 	private static BufferedReader br = null;
 	private static List<String> urls = null;
@@ -36,13 +38,19 @@ public class SearchEngine {
 	 * 
 	 * @throws IOException
 	 */
-	private static void getUrls() throws IOException {
+	private void getUrls() throws IOException {
+		if(urls == null){
+			urls = new ArrayList<String>();
+		}
+		
 		FileReader reader = new FileReader(System.getProperty("user.dir") + "/res/dblp.config");
 		br = new BufferedReader(reader);
 		String url = null;
 		while ((url = br.readLine()) != null) {
 			urls.add(url);
 		}
+		
+		br.close();
 	}
 
 	/**
@@ -60,85 +68,44 @@ public class SearchEngine {
 	 */
 	public List<Paper> search(int startingYear) throws Exception {
 		List<Paper> paperlist = new ArrayList<Paper>();
-		getUrls();
-
-		/*
-		 * 下面的代码中，有很多是循环套循环，防止死在某个循环里，我们可以先得到第一个循环的结果，再对这个循环进行遍历，并做相关操作。（比如，
-		 * 通过一个方法来获得一个集合，这样一个方法的代码看起来也不会很混乱） 
-		 * 比如：getUrls()这个方法拿出来，search（）方法看起来会清楚写，当然也可以不拿出来。
-		 * 因为我在跑这个代码的时候出现在中途报出异常，没有一个成功的获得任何一篇paper的信息。
-		 * 
-		 * 你用的有些for语句是加强版的，加强版的效率好像要低一些，如果遇到数据较多的情况，要考虑效率的问题，你可以先确定哪种for语句效率高。
-		 * 
-		 * 另外，在你自己写的时候，会用到System.out.println(),测试完没问题，就删除这个语句好些，影响代码的阅读。弄得代码很繁琐。
-		 * 
-		 * 还有，像private static final int TIME_OUT = 10000;经常会用到，或者可以修改的变量，尽量不要写死，防止以后修改麻烦。
-		 * 
-		 */
+		this.getUrls();
 
 		// start crawl papers with basic information from dblp sites
 		// from starting year to current year
+		// get Document of each url with network
 		int currentYear = Calendar.getInstance().get(Calendar.YEAR);
-		System.out.println("cur year:" + currentYear);
+		List<Document> docList = new ArrayList<Document>();
 		for (int index = 0; index < urls.size(); ++index) {
 			String dblpUrl = urls.get(index);
 			Document doc = Jsoup.connect(dblpUrl).userAgent(USER_AGENT).timeout(TIME_OUT).get();
-
-			// start analyzing corresponding to journal and conference
-			if (dblpUrl.contains("db/journals")) {
-				Element main = doc.getElementById("main");
-				Elements lis = main.getElementsByTag("li");
-				// get venue
-				String venue = doc.select(".headline").select(".noline").first().text();
-				System.out.println("venue:" + venue);
-
-				for (Element li : lis) {
-					// get papers from starting year
-					for (int i = startingYear; i <= currentYear; ++i) {
-						String validYear = String.valueOf(i);
-						if (li.text().contains(validYear)) {
-							Elements as = li.getElementsByTag("a");
-							for (Element a : as) {
-								String url = a.attr("href");
-								System.out.println("url:" + url);
-								// get papers of each journals and add to papaer
-								// list
-								List<Paper> list = this.getPapers(url, "article", venue);
-								paperlist.addAll(list);
-							}
-							continue;
-						}
-					}
-				}
-
-			} else if (dblpUrl.contains("db/conf")) {
-				Elements eles = doc.select(".entry");
-
-				String venue = doc.select(".headline").select(".noline").first().text();
-				System.out.println("eles size:" + eles.size() + ", venue:" + venue);
-
-				for (Element ele : eles) {
-					Element eData = ele.getElementsByClass("data").first();
-					// get year
-					int year = 0;
-					Elements eYear = eData.getElementsByAttributeValue("itemprop", "datePublished");
-					year = Integer.valueOf(eYear.first().text());
-					// get detail conference paper list
-					String cUrl = ele.select(".publ").select(".head").get(0).getElementsByTag("a").first().attr("href");
-					// get papers from starting year
-					if (year >= startingYear) {
-						System.out.println("year:" + year + ",confUrl:" + cUrl);
-						// get papers of each conference and add to papaer list
-						List<Paper> list = this.getPapers(cUrl, "inproceedings", venue);
-						paperlist.addAll(list);
-					}
-				}
-
-			}
+			docList.add(doc);
+		}
+		
+		// analysis of document with Jsoup
+		// get url, type, venue information of each paper
+		List<Map<String, String>> paperForCrawlList = new ArrayList<Map<String, String>>();
+		for(int index = 0; index < docList.size(); ++index){
+			String dblpUrl = urls.get(index);
+			Document doc = docList.get(index);
+			this.analysisDocument(paperForCrawlList, dblpUrl, doc, startingYear, currentYear);
+		}
+		
+		//get detail information of each paper with network
+		for(int i = 0; i< paperForCrawlList.size(); ++i){
+			Map<String, String> map = paperForCrawlList.get(i);
+			String url = map.get("url");
+			String type = map.get("type");
+			String venue = map.get("venue");
+			
+			// get papers of each conference and journals
+			List<Paper> list = this.getPapers(url, type, venue);
+			paperlist.addAll(list);
 		}
 
 		return paperlist;
 	}
+	
+	
 
 	/**
 	 * To refill the missing attributes (e.g., abstract, author affiliation,
@@ -201,8 +168,6 @@ public class SearchEngine {
 		Document doc = Jsoup.connect(url).userAgent(USER_AGENT).timeout(TIME_OUT).get();
 		Elements entries = doc.select(".entry").select("." + type);
 
-		System.out.println("detail:" + entries.size());
-
 		for (Element ele : entries) {
 			Element data = ele.getElementsByClass("data").first();
 			// get title
@@ -237,8 +202,6 @@ public class SearchEngine {
 				dbtype = Publisher.IET;
 			}
 
-			System.out.println("name:" + title + ", year:" + year + ",doi:" + doi);
-
 			// construct paper with obtained information
 			Paper paper = new Paper();
 			paper.setpYear(year);
@@ -255,4 +218,64 @@ public class SearchEngine {
 		return list;
 	}
 
+	/**
+	 *  this function handle the analysis work of each venue's html document to get wannted paper urls
+	 *  then, add these urls to prepared list
+	 *  
+	 *  @param paperForCrawlList, dplpUrl, doc, startYear, endYear
+	 *  @return void
+	 */
+	private void analysisDocument(List<Map<String, String>> paperForCrawlList, String dblpUrl, Document doc, int startYear, int endYear){
+		
+		// start analyzing corresponding to journal and conference
+		if (dblpUrl.contains("db/journals")) {
+			Element main = doc.getElementById("main");
+			Elements lis = main.getElementsByTag("li");
+			// get venue
+			String venue = doc.select(".headline").select(".noline").first().text();
+
+			for (Element li : lis) {
+				// get papers from starting year
+				for (int i = startYear; i <= endYear; ++i) {
+					String validYear = String.valueOf(i);
+					if (li.text().contains(validYear)) {
+						Elements as = li.getElementsByTag("a");
+						for (Element a : as) {
+							String url = a.attr("href");
+							Map<String, String> map = new HashMap<String, String>();
+							map.put("url", url);
+							map.put("type", "article");
+							map.put("venue", venue);
+							paperForCrawlList.add(map);
+						}
+						continue;
+					}
+				}
+			}
+
+		} else if (dblpUrl.contains("db/conf")) {
+			Elements eles = doc.select(".entry");
+
+			String venue = doc.select(".headline").select(".noline").first().text();
+
+			for (Element ele : eles) {
+				Element eData = ele.getElementsByClass("data").first();
+				// get year
+				int year = 0;
+				Elements eYear = eData.getElementsByAttributeValue("itemprop", "datePublished");
+				year = Integer.valueOf(eYear.first().text());
+				// get detail conference paper list
+				String cUrl = ele.select(".publ").select(".head").get(0).getElementsByTag("a").first().attr("href");
+				// get papers from starting year
+				if (year >= startYear) {
+					Map<String, String> map = new HashMap<String, String>();
+					map.put("url", cUrl);
+					map.put("type", "inproceedings");
+					map.put("venue", venue);
+					paperForCrawlList.add(map);
+				}
+			}
+		}
+		
+	}
 }

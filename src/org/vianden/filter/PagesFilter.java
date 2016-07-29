@@ -1,16 +1,15 @@
 package org.vianden.filter;
 
-import java.util.List;
-
 import org.vianden.model.Paper;
 
 /**
- * Based on the given keywords to filter out irrelevant papers.
+ * Based on the given pages to filter out irrelevant papers.
  * 
  * @author li.li
  */
 public class PagesFilter implements IFilter 
 {
+	//can't tell whether a paper takes single column or double
 	private int minSingleColumnPages = 9;
 	private int minDoubleColumnPages = 5;
 	
@@ -20,11 +19,15 @@ public class PagesFilter implements IFilter
 		this.minDoubleColumnPages = minDoubleColumnPages;
 	}
 	
-	
 	@Override
 	public boolean filter(Paper paper) 
 	{
-		
+		if(paper.getpPages()!=null){
+			int pages = Integer.valueOf(paper.getpPages());
+			if(pages<minDoubleColumnPages){
+				return true;
+			}
+		}
 		return false;
 	}
 
