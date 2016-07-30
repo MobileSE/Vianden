@@ -33,7 +33,7 @@ public class USENIXCrawlerTest {
 		String urlUSENIX = pp.getProperty("urlUSENIX");
 		paper = new Paper();
 		paper.setpDoi(urlUSENIX);
-		paper.setpDatabaseType(Publisher.USENIX);
+		paper.setpPublisher(Publisher.USENIX);
 		
 		//initialize crawler
 		crawler = new USENIXCrawler(paper);

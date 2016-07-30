@@ -16,4 +16,18 @@ public class Publisher
 	public static final int EMERALD = 12;						//Information Management & Computer Security (IMCS)
 	public static final int IGI_GLOBAL = 13;					//International Journal of Information Security and Privacy (IJISP)
 	//...more
+	
+	
+	public static boolean isSingleColumn(int publisher){
+		boolean flag = false;
+		
+		switch(publisher){
+		case Publisher.ACM: flag = false;
+			break;
+		case Publisher.SPRINGER: flag = true;
+			break;
+		}
+		
+		return flag;
+	}
 }

@@ -37,7 +37,7 @@ public class ACMCrawlerTest {
 		String urlACM = pp.getProperty("urlACM");
 		paper = new Paper();
 		paper.setpDoi(urlACM);
-		paper.setpDatabaseType(Publisher.ACM);
+		paper.setpPublisher(Publisher.ACM);
 		
 		//initialize crawler
 		crawler = new ACMCrawler(paper);

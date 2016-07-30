@@ -35,7 +35,7 @@ public class ElsevierCrawlerTest {
 		String urlElsevier = pp.getProperty("urlElsevier");
 		paper = new Paper();
 		paper.setpDoi(urlElsevier);
-		paper.setpDatabaseType(Publisher.ELSEVIER);
+		paper.setpPublisher(Publisher.ELSEVIER);
 		
 		//initialize crawler
 		crawler = new ElsevierCrawler(paper);

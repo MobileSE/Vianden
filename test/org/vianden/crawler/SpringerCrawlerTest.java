@@ -39,7 +39,7 @@ public class SpringerCrawlerTest {
 		String urlSpringer = pp.getProperty("urlSpringer");
 		paper = new Paper();
 		paper.setpDoi(urlSpringer);
-		paper.setpDatabaseType(Publisher.SPRINGER);
+		paper.setpPublisher(Publisher.SPRINGER);
 		
 		//initialize crawler
 		crawler = new SpringerCrawler(paper);

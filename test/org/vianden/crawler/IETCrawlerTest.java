@@ -37,7 +37,7 @@ public class IETCrawlerTest {
 		String urlIET = pp.getProperty("urlIET");
 		paper = new Paper();
 		paper.setpDoi(urlIET);
-		paper.setpDatabaseType(Publisher.IET);
+		paper.setpPublisher(Publisher.IET);
 		
 		//initialize crawler
 		crawler = new IETCrawler(paper);

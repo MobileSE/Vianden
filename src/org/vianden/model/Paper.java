@@ -10,7 +10,7 @@ public class Paper
 	protected String pYear;
 	protected String pDoi;
 	protected String pVenue;
-	protected int pDatabaseType;
+	protected int pPublisher;
 	
 	//Database Refine
 	protected String pAbstract;
@@ -51,11 +51,11 @@ public class Paper
 	public void setpVenue(String pVenue) {
 		this.pVenue = pVenue;
 	}
-	public int getpDatabaseType() {
-		return pDatabaseType;
+	public int getpPublisher() {
+		return pPublisher;
 	}
-	public void setpDatabaseType(int pDatabaseType) {
-		this.pDatabaseType = pDatabaseType;
+	public void setpPublisher(int pPublisher) {
+		this.pPublisher = pPublisher;
 	}
 	public String getpAbstract() {
 		return pAbstract;
@@ -124,7 +124,7 @@ public class Paper
 	public String toString() 
 	{
 		return "Paper [pTitle=" + pTitle + ", pAuthors=" + pAuthors + ", pYear=" + pYear + ", pDoi=" + pDoi
-				+ ", pVenue=" + pVenue + ", pDatabaseType=" + pDatabaseType + ", pAbstract=" + pAbstract + ", pPages="
+				+ ", pVenue=" + pVenue + ", pDatabaseType=" + pPublisher + ", pAbstract=" + pAbstract + ", pPages="
 				+ pPages + ", pEmail=" + pEmail + ", pKeywords=" + pKeywords + ", pPdfUrl=" + pPdfUrl + ", pReferences="
 				+ pReferences + "]";
 	}

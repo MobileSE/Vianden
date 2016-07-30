@@ -37,7 +37,7 @@ public class WileyCrawlerTest {
 		String urlWiley = pp.getProperty("urlWiley");
 		paper = new Paper();
 		paper.setpDoi(urlWiley);
-		paper.setpDatabaseType(Publisher.ACM);
+		paper.setpPublisher(Publisher.ACM);
 		
 		//initialize crawler
 		crawler = new WileyCrawler(paper);

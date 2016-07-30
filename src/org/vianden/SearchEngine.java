@@ -118,7 +118,7 @@ public class SearchEngine {
 	public Paper refine(Paper paper) throws Exception {
 		AbstractCrawler absCrawler = null;
 
-		switch (paper.getpDatabaseType()) {
+		switch (paper.getpPublisher()) {
 		case Publisher.ACM:
 			absCrawler = new ACMCrawler(paper);
 			break;
@@ -209,7 +209,7 @@ public class SearchEngine {
 			paper.setpTitle(title);
 			paper.setpDoi(doi);
 			paper.setpVenue(venue);
-			paper.setpDatabaseType(dbtype);
+			paper.setpPublisher(dbtype);
 
 			// add paper to list
 			list.add(paper);
