@@ -33,27 +33,6 @@ public class SearchEngine {
 	private static List<String> urls = null;
 
 	/**
-	 * Getting the web sites which will be used to search papers from the file
-	 * dblp.config.
-	 * 
-	 * @throws IOException
-	 */
-	private void getUrls() throws IOException {
-		if(urls == null){
-			urls = new ArrayList<String>();
-		}
-		
-		FileReader reader = new FileReader(System.getProperty("user.dir") + "/res/dblp.config");
-		br = new BufferedReader(reader);
-		String url = null;
-		while ((url = br.readLine()) != null) {
-			urls.add(url);
-		}
-		
-		br.close();
-	}
-
-	/**
 	 * Based on the res/dblp.config, to crawl all the papers relating to the
 	 * given venues (conferences or journals).
 	 * 
@@ -155,10 +134,32 @@ public class SearchEngine {
 	}
 
 	/**
+	 * Getting the web sites which will be used to search papers from the file
+	 * dblp.config.
+	 * 
+	 * @throws IOException
+	 */
+	private void getUrls() throws IOException {
+		if(urls == null){
+			urls = new ArrayList<String>();
+		}
+		
+		FileReader reader = new FileReader(System.getProperty("user.dir") + "/res/dblp.config");
+		br = new BufferedReader(reader);
+		String url = null;
+		while ((url = br.readLine()) != null) {
+			urls.add(url);
+		}
+		
+		br.close();
+	}
+	
+	/**
 	 * get papers from each single journal or conference page
 	 * 
-	 * @param url(journal
-	 *            or conference page url), type(article or inproceedings), venue
+	 * @param url(journal or conference page url)
+	 * @param type(article or inproceedings)
+	 * @param venue
 	 * @return the papers list of the single journal or conference
 	 * @throws Exception
 	 */
@@ -222,7 +223,11 @@ public class SearchEngine {
 	 *  this function handle the analysis work of each venue's html document to get wannted paper urls
 	 *  then, add these urls to prepared list
 	 *  
-	 *  @param paperForCrawlList, dplpUrl, doc, startYear, endYear
+	 *  @param paperForCrawlList
+	 *  @param dplpUrl, used to tell journal or conference
+	 *  @param doc, document waited to be analyse
+	 *  @param startYear
+	 *  @param endYear
 	 *  @return void
 	 */
 	private void analysisDocument(List<Map<String, String>> paperForCrawlList, String dblpUrl, Document doc, int startYear, int endYear){

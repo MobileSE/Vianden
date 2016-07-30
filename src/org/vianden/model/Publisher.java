@@ -21,8 +21,13 @@ public class Publisher
 	public static boolean isSingleColumn(int publisher){
 		boolean flag = false;
 		
+		//judging single or double column
 		switch(publisher){
-		case Publisher.ACM: flag = false;
+		case Publisher.ACM:
+		case Publisher.IEEE:
+		case Publisher.ELSEVIER: 
+		case Publisher.WILEY:
+		case Publisher.USENIX: flag = false;
 			break;
 		case Publisher.SPRINGER: flag = true;
 			break;

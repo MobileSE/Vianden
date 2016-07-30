@@ -1,7 +1,6 @@
 package org.vianden.filter;
 
 import java.io.BufferedReader;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -14,19 +13,16 @@ import org.vianden.model.Paper;
  * 
  * @author li.li
  */
-public class KeywordsFilter implements IFilter 
-{
+public class KeywordsFilter implements IFilter {
 	List<String> keywords = null;
 	private static BufferedReader br = null;
 	
-	public KeywordsFilter(List<String> keywords)
-	{
+	public KeywordsFilter(List<String> keywords) {
 		this.keywords = keywords;
 	}
 	
 	// The default path is res/keywords.config
-	public KeywordsFilter(String configPath) throws IOException
-	{
+	public KeywordsFilter(String configPath) throws IOException {
 		if(configPath == null){
 			configPath = System.getProperty("user.dir") + "/res/keywords.config";
 		}
