@@ -6,6 +6,7 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import org.vianden.config.AgentInfo;
 import org.vianden.model.Paper;
 
 public class IEEECrawler extends AbstractCrawler
@@ -26,8 +27,8 @@ public class IEEECrawler extends AbstractCrawler
 		//can not get absolute address via .attr("abs:href")
 		String refurl = "http://ieeexplore.ieee.org" + ref.attr("href"); 
 		
-		Document redoc = Jsoup.connect(refurl).userAgent("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_5) AppleWebKit/601.6.17 (KHTML, like Gecko) Version/9.1.1 Safari/601.6.17")
-				.timeout(10000).get();
+		Document redoc = Jsoup.connect(refurl).userAgent(AgentInfo.getUSER_AGENT())
+				.timeout(AgentInfo.getTIME_OUT()).get();
 		Elements docsClass = redoc.getElementsByClass("docs");
 		if(docsClass!=null && docsClass.size()>0){
 			Element docs = docsClass.first();

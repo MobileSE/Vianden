@@ -7,6 +7,7 @@ import java.util.Set;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import org.vianden.config.AgentInfo;
 import org.vianden.model.Author;
 import org.vianden.model.Paper;
 
@@ -64,16 +65,16 @@ public class ACMCrawler extends AbstractCrawler {
 			String refsuffix = desStr.substring(refstart, refend);
 			
 			//get abstract
-			Elements ps = Jsoup.connect(prefix + abssuffix).userAgent("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_5) AppleWebKit/601.6.17 (KHTML, like Gecko) Version/9.1.1 Safari/601.6.17")
-					.timeout(10000).get().getElementsByTag("p");
+			Elements ps = Jsoup.connect(prefix + abssuffix).userAgent(AgentInfo.getUSER_AGENT())
+					.timeout(AgentInfo.getTIME_OUT()).get().getElementsByTag("p");
 			if(ps.size()>0){
 				abstractStr = ps.first().text();
 			}
-			System.out.println(abssuffix);
-			System.out.println(refsuffix);
+//			System.out.println(abssuffix);
+//			System.out.println(refsuffix);
 			
 			//get references
-			Elements acmrefs = Jsoup.connect(prefix + refsuffix).userAgent("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_5) AppleWebKit/601.6.17 (KHTML, like Gecko) Version/9.1.1 Safari/601.6.17")
+			Elements acmrefs = Jsoup.connect(prefix + refsuffix).userAgent(AgentInfo.getUSER_AGENT())
 					.timeout(10000).get().getElementsByTag("tr");
 			if(acmrefs != null){
 				for(Element tr : acmrefs){

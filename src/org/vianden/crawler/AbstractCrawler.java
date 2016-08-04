@@ -10,6 +10,7 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import org.vianden.config.AgentInfo;
 import org.vianden.model.Author;
 import org.vianden.model.Paper;
 
@@ -47,9 +48,9 @@ public abstract class AbstractCrawler implements ICrawler
 	}
 	
 	private void commonCrawl() throws IOException{
-		doc = Jsoup.connect(paper.getpDoi())
-				.userAgent("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_5) AppleWebKit/601.6.17 (KHTML, like Gecko) Version/9.1.1 Safari/601.6.17")
-				.timeout(20000).get();
+		doc = Jsoup.connect(paper.getDoi())
+				.userAgent(AgentInfo.getUSER_AGENT())
+				.timeout(2 * AgentInfo.getTIME_OUT()).get();
 		
 		Elements metaEles = doc.getElementsByTag("meta");
 		for(int i=0; i< metaEles.size(); ++i){
@@ -63,7 +64,6 @@ public abstract class AbstractCrawler implements ICrawler
 			}else if(name.equals("citation_journal_title") || name.equals("citation_conference")){
 				venueStr = ele.attr("content");
 			}else if(name.equals("citation_author_email")){	//email:IEEE, Springer
-			
 				emailStr += ele.attr("content") + ";";
 			}else if(name.equals("citation_pdf_url")){	//pdf:IEEE, Springer, USENIX, ACM
 				pdfUrlStr = ele.attr("content");
@@ -101,16 +101,16 @@ public abstract class AbstractCrawler implements ICrawler
 	
 	public void finishCrawl(){
 		//set paper's informations
-		paper.setpTitle(titileStr);
-		paper.setpAbstract(abstractStr.trim());
-		paper.setpVenue(venueStr);
-		paper.setpEmail(emailStr.trim());
-		paper.setpKeywords(keywordsStr.trim());
-		paper.setpPdfUrl(pdfUrlStr.trim());
-		paper.setpPages(String.valueOf(pages).trim());
-		paper.setpReferences(reference);
+		paper.setTitle(titileStr);
+		paper.setAbstract(abstractStr.trim());
+		paper.setVenue(venueStr);
+		paper.setEmail(emailStr.trim());
+		paper.setKeywords(keywordsStr.trim());
+		paper.setPdfUrl(pdfUrlStr.trim());
+		paper.setPages(String.valueOf(pages).trim());
+		paper.setReferences(reference);
 		if(authors.size()>0){
-			paper.setpAuthors(authors);
+			paper.setAuthors(authors);
 		}
 		
 	}

@@ -8,6 +8,7 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import org.vianden.config.AgentInfo;
 import org.vianden.model.Author;
 import org.vianden.model.Paper;
 
@@ -23,8 +24,8 @@ public class IETCrawler extends AbstractCrawler {
 		//iet database url
 		String ieturl = as.get(2).attr("href");
 		//refine by iet database
-		Document ietdoc = Jsoup.connect(ieturl).userAgent("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_5) AppleWebKit/601.6.17 (KHTML, like Gecko) Version/9.1.1 Safari/601.6.17")
-				.timeout(20000).get();
+		Document ietdoc = Jsoup.connect(ieturl).userAgent(AgentInfo.getUSER_AGENT())
+				.timeout(2 * AgentInfo.getTIME_OUT()).get();
 		Elements ietmetaEles = ietdoc.getElementsByTag("meta");
 		for(int i=0; i< ietmetaEles.size(); ++i){
 			Element ele = ietmetaEles.get(i);
@@ -74,8 +75,8 @@ public class IETCrawler extends AbstractCrawler {
 		//ieee database url to get pdf
 		//refine by ieee database
 		String ieeeurl = as.get(3).attr("href");
-		Document ieeedoc = Jsoup.connect(ieeeurl).userAgent("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_5) AppleWebKit/601.6.17 (KHTML, like Gecko) Version/9.1.1 Safari/601.6.17")
-				.timeout(10000).get();
+		Document ieeedoc = Jsoup.connect(ieeeurl).userAgent(AgentInfo.getUSER_AGENT())
+				.timeout(AgentInfo.getTIME_OUT()).get();
 		Elements ieeemetaEles = ieeedoc.getElementsByTag("meta");
 		for(int i=0; i< ieeemetaEles.size(); ++i){
 			Element ele = ieeemetaEles.get(i);

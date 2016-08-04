@@ -44,7 +44,7 @@ public class KeywordsFilter implements IFilter {
 	@Override
 	public boolean filter(Paper paper) 
 	{
-		String[] keyArr = paper.getpKeywords().split(";");
+		String[] keyArr = paper.getKeywords().split(";");
 		//start filtering
 		for(int i=0; i<keywords.size(); ++i){
 			for(int j=0; j<keyArr.length; ++j){

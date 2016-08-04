@@ -1,34 +1,105 @@
 package org.vianden;
 
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 
+import org.apache.poi.hssf.usermodel.HSSFCell;
+import org.apache.poi.hssf.usermodel.HSSFRow;
+import org.apache.poi.hssf.usermodel.HSSFSheet;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.ss.util.CellRangeAddress;
+import org.vianden.model.Author;
 import org.vianden.model.Paper;
 
-public class SearchEngineTest 
-{
-	public static void main(String[] args) throws Exception
-	{
+public class SearchEngineTest {
+	public static void main(String[] args) throws Exception {
 		SearchEngine se = new SearchEngine();
-		List<Paper> papers = se.search(2015);
+		// We can delete some papers in which title does not contain the
+		// keywords.
+		List<Paper> papers = se.search(1998); // 1997: NPE, 1998: OK.
+
+		//int count = 0;
+		System.out.println(papers.size());
+		 for (Paper p : papers)
+		 {
+//		 count++;
+		 // if (count < 10)
+		 // {
+		 // continue;
+		 // }
+		 p = se.refine(p);
+//		 System.out.println("--" + p.getpAbstract());
+//		 System.out.println("--" + p.getpAuthors());
+//		 System.out.println(count + "\n");
 		
-		int count = 0;
+		 //break;
+		 }
+
+createSheet(papers);
+	}
+
+	public static void createSheet(List<Paper> papers) {
+		HSSFWorkbook wb = new HSSFWorkbook();
+		HSSFSheet sheet = wb.createSheet("papers");
+		HSSFRow row = sheet.createRow(0);
+		row.createCell(0).setCellValue("Title");
+		row.createCell(1).setCellValue("authors");
+		row.createCell(2).setCellValue("year");
+		row.createCell(3).setCellValue("doi");
+		row.createCell(4).setCellValue("venue");
+		row.createCell(5).setCellValue("publisher");
+		row.createCell(6).setCellValue("abstract");
+		row.createCell(7).setCellValue("pages");
+		row.createCell(8).setCellValue("email");
+		row.createCell(9).setCellValue("keywords");
+		row.createCell(10).setCellValue("pdfUrl");
+//		row.createCell(11).setCellValue("references");
+		Iterator<Paper> it = papers.iterator();
+		int rowNumber = 1;
+		while (it.hasNext()) {
+			row = sheet.createRow(rowNumber);
+			row.createCell(0).setCellValue(it.next().getTitle());
+			row.createCell(1).setCellValue(it.next().getAllAuthorsName());
+			row.createCell(2).setCellValue(it.next().getYear());
+			row.createCell(3).setCellValue(it.next().getDoi());
+			row.createCell(4).setCellValue(it.next().getVenue());
+			row.createCell(5).setCellValue(it.next().getPublisher());
+			row.createCell(6).setCellValue(it.next().getAbstract());
+			row.createCell(7).setCellValue(it.next().getPages());
+			row.createCell(8).setCellValue(it.next().getEmail());
+			row.createCell(9).setCellValue(it.next().getKeywords());
+			row.createCell(10).setCellValue(it.next().getPdfUrl());
+//			row.createCell(11).setCellValue(it.next().getReferences());
+			rowNumber ++;
+		}
 		
-		for (Paper p : papers)
-		{
-			count++;
-			
-			if (count < 10)
-			{
-				continue;
+		FileOutputStream output = null;
+		try {
+			output = new FileOutputStream(System.getProperty("user.dir")
+					+ "/res/papers_C_A.xls");
+			wb.write(output);
+			output.flush();
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} finally {
+			if (output != null) {
+				try {
+					output.close();
+					output = null;
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 			}
-			
-			p = se.refine(p);
-			
-			System.out.println("--" + p.getpAbstract());
-			System.out.println("--" + p.getpAuthors());
-			System.out.println();
-			
-			break;
 		}
 	}
 }

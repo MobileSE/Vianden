@@ -36,8 +36,8 @@ public class ACMCrawlerTest {
 		//construct paper
 		String urlACM = pp.getProperty("urlACM");
 		paper = new Paper();
-		paper.setpDoi(urlACM);
-		paper.setpPublisher(Publisher.ACM);
+		paper.setDoi(urlACM);
+		paper.setPublisher(Publisher.ACM);
 		
 		//initialize crawler
 		crawler = new ACMCrawler(paper);
@@ -48,12 +48,12 @@ public class ACMCrawlerTest {
 		crawler.crawl();
 		crawler.finishCrawl();
 		
-		assertEquals(tAbstract, paper.getpAbstract());
-		assertEquals(tKeywords, paper.getpKeywords());
-		assertEquals(tPdfurl, paper.getpPdfUrl());
-		assertEquals(tPages, paper.getpPages());
-		assertEquals(tReferences, paper.getpReferences().toString());
-		assertEquals(tAuthors, paper.getpAuthors().toString());
+		assertEquals(tAbstract, paper.getAbstract());
+		assertEquals(tKeywords, paper.getKeywords());
+		assertEquals(tPdfurl, paper.getPdfUrl());
+		assertEquals(tPages, paper.getPages());
+		assertEquals(tReferences, paper.getReferences().toString());
+		assertEquals(tAuthors, paper.getAuthors().toString());
 	}
 
 }

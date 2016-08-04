@@ -1,97 +1,108 @@
 package org.vianden.model;
 
+import java.util.Iterator;
 import java.util.List;
 
 public class Paper 
 {
 	//DBLP Search
-	protected String pTitle;
-	protected List<Author> pAuthors;
-	protected String pYear;
-	protected String pDoi;
-	protected String pVenue;
-	protected int pPublisher;
+	protected String title;
+	protected List<Author> authors;
+	protected String year;
+	protected String doi;
+	protected String venue;
+	protected int publisher;
 	
 	//Database Refine
-	protected String pAbstract;
-	protected String pPages;
-	protected String pEmail;
-	protected String pKeywords;
-	protected String pPdfUrl;
-	protected List<String> pReferences;
+	protected String _abstract;
+	protected String pages;
+	protected String email;
+	protected String keywords;
+	protected String pdfUrl;
+	/*
+	 * In my opinion, the references are not necessary to the 'refine' method.
+	 * References won't influence the result of filtering.
+	 * However, the obtain of references will influence of the effectiveness of 'refine' method.
+	 * 
+	 * Only after we finally confirm the selected papers, we may need the references of papers for further works.
+	 * So, all methods with respect to references should be put on the future research work.
+	 * For example, we want to do extension research works about the selected papers.
+	 * 
+	 */
+	protected List<String> references;  //references should be papers.
 	
 	
-	public String getpTitle() {
-		return pTitle;
+	public String getTitle() {
+		return title;
 	}
-	public void setpTitle(String pTitle) {
-		this.pTitle = pTitle;
+	public void setTitle(String title) {
+		this.title = title;
 	}
-	public List<Author> getpAuthors() {
-		return pAuthors;
+	public List<Author> getAuthors() {
+		return authors;
 	}
-	public void setpAuthors(List<Author> pAuthors) {
-		this.pAuthors = pAuthors;
+	public void setAuthors(List<Author> authors) {
+		this.authors = authors;
 	}
-	public String getpYear() {
-		return pYear;
+	public String getYear() {
+		return year;
 	}
-	public void setpYear(String pYear) {
-		this.pYear = pYear;
+	public void setYear(String year) {
+		this.year = year;
 	}
-	public String getpDoi() {
-		return pDoi;
+	public String getDoi() {
+		return doi;
 	}
-	public void setpDoi(String pDoi) {
-		this.pDoi = pDoi;
+	public void setDoi(String doi) {
+		this.doi = doi;
 	}
-	public String getpVenue() {
-		return pVenue;
+	public String getVenue() {
+		return venue;
 	}
-	public void setpVenue(String pVenue) {
-		this.pVenue = pVenue;
+	public void setVenue(String venue) {
+		this.venue = venue;
 	}
-	public int getpPublisher() {
-		return pPublisher;
+	public int getPublisher() {
+		return publisher;
 	}
-	public void setpPublisher(int pPublisher) {
-		this.pPublisher = pPublisher;
+	public void setPublisher(int publisher) {
+		this.publisher = publisher;
 	}
-	public String getpAbstract() {
-		return pAbstract;
+	public String getAbstract() {
+		return _abstract;
 	}
-	public void setpAbstract(String pAbstract) {
-		this.pAbstract = pAbstract;
+	public void setAbstract(String _abstract) {
+		this._abstract = _abstract;
 	}
-	public String getpPages() {
-		return pPages;
+	public String getPages() {
+		return pages;
 	}
-	public void setpPages(String pPages) {
-		this.pPages = pPages;
+	public void setPages(String pages) {
+		this.pages = pages;
 	}
-	public String getpEmail() {
-		return pEmail;
+	public String getEmail() {
+		return email;
 	}
-	public void setpEmail(String pEmail) {
-		this.pEmail = pEmail;
+	public void setEmail(String email) {
+		this.email = email;
 	}
-	public String getpKeywords() {
-		return pKeywords;
+	public String getKeywords() {
+		return keywords;
 	}
-	public void setpKeywords(String pKeywords) {
-		this.pKeywords = pKeywords;
+	public void setKeywords(String keywords) {
+		this.keywords = keywords;
 	}
-	public String getpPdfUrl() {
-		return pPdfUrl;
+	public String getPdfUrl() {
+		return pdfUrl;
 	}
-	public void setpPdfUrl(String pPdfUrl) {
-		this.pPdfUrl = pPdfUrl;
+	public void setPdfUrl(String pdfUrl) {
+		this.pdfUrl = pdfUrl;
 	}
-	public List<String> getpReferences() {
-		return pReferences;
+	public List<String> getReferences() {
+		return references;
 	}
-	public void setpReferences(List<String> pReferences) {
-		this.pReferences = pReferences;
+	public void setReferences(List<String> references) {
+		this.references = references;
 	}
 	
 	@Override
@@ -111,10 +122,10 @@ public class Paper
 			return false;
 		Paper other = (Paper) obj;
 		
-		if (pDoi == null) {
-			if (other.pDoi != null)
+		if (doi == null) {
+			if (other.doi != null)
 				return false;
-		} else if (!pDoi.equals(other.pDoi))
+		} else if (!doi.equals(other.doi))
 			return false;
 		
 		return true;
@@ -123,9 +134,26 @@ public class Paper
 	@Override
 	public String toString() 
 	{
-		return "Paper [pTitle=" + pTitle + ", pAuthors=" + pAuthors + ", pYear=" + pYear + ", pDoi=" + pDoi
-				+ ", pVenue=" + pVenue + ", pDatabaseType=" + pPublisher + ", pAbstract=" + pAbstract + ", pPages="
-				+ pPages + ", pEmail=" + pEmail + ", pKeywords=" + pKeywords + ", pPdfUrl=" + pPdfUrl + ", pReferences="
-				+ pReferences + "]";
+		/*
+		 * I didn't test this method, but I think there is a bug in this method.
+		 * Member variables 'authors' and 'references' are belong the type of List,
+		 * so, authors.toString() and referenes.toString() won't return what we really want.
+		 */
+		return "Paper [pTitle=" + title + ", pAuthors=" + authors + ", pYear=" + year + ", pDoi=" + doi
+				+ ", pVenue=" + venue + ", pDatabaseType=" + publisher + ", pAbstract=" + _abstract + ", pPages="
+				+ pages + ", pEmail=" + email + ", pKeywords=" + keywords + ", pPdfUrl=" + pdfUrl + ", pReferences="
+				+ references + "]";
+	}
+	
+	public String getAllAuthorsName() {
+		String authorsName = "";
+		Iterator<Author> it = authors.iterator();
+		while (it.hasNext()) {
+			if ("" != authorsName) {
+				authorsName += ",";
+			}
+			authorsName += it.next().getName();
+		}
+		return authorsName;
 	}
 }

@@ -13,6 +13,7 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import org.vianden.config.AgentInfo;
 import org.vianden.crawler.ACMCrawler;
 import org.vianden.crawler.AbstractCrawler;
 import org.vianden.crawler.ElsevierCrawler;
@@ -26,11 +27,10 @@ import org.vianden.model.Publisher;
 import org.vianden.model.Paper;
 
 public class SearchEngine {
-	private static final String USER_AGENT = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_5) AppleWebKit/601.6.17 (KHTML, like Gecko) Version/9.1.1 Safari/601.6.17";
-	private static final int TIME_OUT = 100000;
-
+	
 	private static BufferedReader br = null;
 	private static List<String> urls = null;
+	
 
 	/**
 	 * Based on the res/dblp.config, to crawl all the papers relating to the
@@ -53,19 +53,12 @@ public class SearchEngine {
 		// from starting year to current year
 		// get Document of each url with network
 		int currentYear = Calendar.getInstance().get(Calendar.YEAR);
-		List<Document> docList = new ArrayList<Document>();
-		for (int index = 0; index < urls.size(); ++index) {
-			String dblpUrl = urls.get(index);
-			Document doc = Jsoup.connect(dblpUrl).userAgent(USER_AGENT).timeout(TIME_OUT).get();
-			docList.add(doc);
-		}
-		
-		// analysis of document with Jsoup
+		Document doc = null;
 		// get url, type, venue information of each paper
 		List<Map<String, String>> paperForCrawlList = new ArrayList<Map<String, String>>();
-		for(int index = 0; index < docList.size(); ++index){
+		for (int index = 0; index < urls.size(); ++index) {
 			String dblpUrl = urls.get(index);
-			Document doc = docList.get(index);
+			doc = Jsoup.connect(dblpUrl).userAgent(AgentInfo.getUSER_AGENT()).timeout(AgentInfo.getTIME_OUT()).get();
 			this.analysisDocument(paperForCrawlList, dblpUrl, doc, startingYear, currentYear);
 		}
 		
@@ -83,8 +76,7 @@ public class SearchEngine {
 
 		return paperlist;
 	}
-	
-	
+
 
 	/**
 	 * To refill the missing attributes (e.g., abstract, author affiliation,
@@ -95,39 +87,39 @@ public class SearchEngine {
 	 * @throws Exception
 	 */
 	public Paper refine(Paper paper) throws Exception {
-		AbstractCrawler absCrawler = null;
+		AbstractCrawler crawler = null;
 
-		switch (paper.getpPublisher()) {
+		switch (paper.getPublisher()) {
 		case Publisher.ACM:
-			absCrawler = new ACMCrawler(paper);
+			crawler = new ACMCrawler(paper);
 			break;
 		case Publisher.IEEE:
-			absCrawler = new IEEECrawler(paper);
+			crawler = new IEEECrawler(paper);
 			break;
 		case Publisher.SPRINGER:
-			absCrawler = new SpringerCrawler(paper);
+			crawler = new SpringerCrawler(paper);
 			break;
 		case Publisher.ELSEVIER:
-			absCrawler = new ElsevierCrawler(paper);
+			crawler = new ElsevierCrawler(paper);
 			break;
 		case Publisher.WILEY:
-			absCrawler = new WileyCrawler(paper);
+			crawler = new WileyCrawler(paper);
 			break;
 		case Publisher.USENIX:
-			absCrawler = new USENIXCrawler(paper);
+			crawler = new USENIXCrawler(paper);
 			break;
 		case Publisher.IET:
-			absCrawler = new IETCrawler(paper);
+			crawler = new IETCrawler(paper);
 			break;
 		default:
 			break;
 		}
 
-		if (absCrawler != null) {
+		if (crawler != null) {
 			// crawling
-			absCrawler.crawl();
+			crawler.crawl();
 			// set data to paper
-			absCrawler.finishCrawl();
+			crawler.finishCrawl();
 		}
 
 		return paper;
@@ -166,7 +158,7 @@ public class SearchEngine {
 	private List<Paper> getPapers(String url, String type, String venue) throws Exception {
 		List<Paper> list = new ArrayList<Paper>();
 
-		Document doc = Jsoup.connect(url).userAgent(USER_AGENT).timeout(TIME_OUT).get();
+		Document doc = Jsoup.connect(url).userAgent(AgentInfo.getUSER_AGENT()).timeout(AgentInfo.getTIME_OUT()).get();
 		Elements entries = doc.select(".entry").select("." + type);
 
 		for (Element ele : entries) {
@@ -203,29 +195,70 @@ public class SearchEngine {
 				dbtype = Publisher.IET;
 			}
 
-			// construct paper with obtained information
-			Paper paper = new Paper();
-			paper.setpYear(year);
-			paper.setpAuthors(authorlist);
-			paper.setpTitle(title);
-			paper.setpDoi(doi);
-			paper.setpVenue(venue);
-			paper.setpPublisher(dbtype);
+			/*
+			 * Filtering out the unrelated papers which do not include the keywords.
+			 * This filtering method won't be perfect.
+			 * But this method can help reduce the workload of the 'refine' method.
+			 * So, we must be very sure about the keywords.
+			 * For example, during the case study, selecting papers about bug classification, 
+			 * I am very sure that the title of selected papers must contain words: bug, defect, fault, flaw or error.
+			 *  
+			 */
+			if (filterByKeyword1(title) && filterByKeyword2(title)) {
+				// construct paper with obtained information
+				Paper paper = new Paper();
+				paper.setYear(year);
+				paper.setAuthors(authorlist);
+				paper.setTitle(title);
+				paper.setDoi(doi);
+				paper.setVenue(venue);
+				paper.setPublisher(dbtype);
 
-			// add paper to list
-			list.add(paper);
+				// add paper to list
+				list.add(paper);	
+			}
 		}
 
 		return list;
 	}
 
+	private boolean filterByKeyword1(String title) {
+		boolean isKeeped = false;
+		if (title.indexOf("bug") >= 0 ||
+			title.indexOf(Keywords.defect.toString()) >= 0 ||
+			title.indexOf(Keywords.fault.toString()) >= 0 ||
+			title.indexOf(Keywords.flaw.toString()) >= 0 ||
+			title.indexOf(Keywords.error.toString()) >= 0) {
+			isKeeped = true;
+		}
+		return isKeeped;
+	}
+
+	private boolean filterByKeyword2(String title) {
+		boolean isKeeped = false;
+		if (title.indexOf("class") >= 0 ||
+			//title.indexOf("classify") >= 0 ||
+			//title.indexOf("classification") >= 0 ||  //These two will be included by the first one.
+			title.indexOf("type") >= 0 ||
+			title.indexOf("pattern") >= 0 ||
+			title.indexOf("model") >= 0 ||
+			title.indexOf("sort") >= 0 ||
+			title.indexOf("category") >= 0 ||
+			title.indexOf("systematics") >= 0 ||
+			title.indexOf("systematisation") >= 0||
+			title.indexOf("species") >= 0) {
+			isKeeped = true;
+		}
+		return isKeeped;
+	}
+
 	/**
-	 *  this function handle the analysis work of each venue's html document to get wannted paper urls
+	 *  this function handle the analysis work of each venue's html document to get wanted paper urls
 	 *  then, add these urls to prepared list
 	 *  
 	 *  @param paperForCrawlList
 	 *  @param dplpUrl, used to tell journal or conference
-	 *  @param doc, document waited to be analyse
+	 *  @param doc, document waited to be analyzed
 	 *  @param startYear
 	 *  @param endYear
 	 *  @return void
