@@ -8,7 +8,9 @@ When the start year is earlier than 1998, the tool will throw an exception in th
 The tool works well when the year is equal to or later than 1998.
 
 BUG 2:
-
+Bug about references.
+IndexOutOfBoundsException on line 65(String refsuffix = desStr.substring(refstart, refend);) in file ACMCrawler.java.
+I remembered (not very clearly now) that refstart is bigger than refend when I was debugging.
 
 BUG 3:
 The url "http://dl.com.org/citation.cfm?doid=2543920" is unavailable.

@@ -3,17 +3,12 @@ package org.vianden;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
-import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
-import org.apache.poi.hssf.usermodel.HSSFCell;
 import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-import org.apache.poi.ss.util.CellRangeAddress;
-import org.vianden.model.Author;
 import org.vianden.model.Paper;
 
 public class SearchEngineTest {
@@ -43,9 +38,10 @@ public class SearchEngineTest {
 createSheet(papers);
 	}
 
+	@SuppressWarnings("resource")
 	public static void createSheet(List<Paper> papers) {
-		HSSFWorkbook wb = new HSSFWorkbook();
-		HSSFSheet sheet = wb.createSheet("papers");
+		HSSFWorkbook workBook = new HSSFWorkbook();
+		HSSFSheet sheet = workBook.createSheet("papers");
 		HSSFRow row = sheet.createRow(0);
 		row.createCell(0).setCellValue("Title");
 		row.createCell(1).setCellValue("authors");
@@ -82,13 +78,11 @@ createSheet(papers);
 		try {
 			output = new FileOutputStream(System.getProperty("user.dir")
 					+ "/res/papers_C_A.xls");
-			wb.write(output);
+			workBook.write(output);
 			output.flush();
 		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} finally {
 			if (output != null) {
@@ -96,7 +90,6 @@ createSheet(papers);
 					output.close();
 					output = null;
 				} catch (IOException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 			}
