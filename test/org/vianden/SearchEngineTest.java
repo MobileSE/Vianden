@@ -20,6 +20,7 @@ public class SearchEngineTest {
 
 		//int count = 0;
 		System.out.println(papers.size());
+		createSheet_T(papers);
 		 for (Paper p : papers)
 		 {
 //		 count++;
@@ -78,6 +79,42 @@ createSheet(papers);
 		try {
 			output = new FileOutputStream(System.getProperty("user.dir")
 					+ "/res/papers_C_A.xls");
+			workBook.write(output);
+			output.flush();
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		} finally {
+			if (output != null) {
+				try {
+					output.close();
+					output = null;
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+	}
+
+	@SuppressWarnings("resource")
+	public static void createSheet_T(List<Paper> papers) {
+		HSSFWorkbook workBook = new HSSFWorkbook();
+		HSSFSheet sheet = workBook.createSheet("papers");
+		HSSFRow row = sheet.createRow(0);
+		row.createCell(0).setCellValue("Title");
+		Iterator<Paper> it = papers.iterator();
+		int rowNumber = 1;
+		while (it.hasNext()) {
+			row = sheet.createRow(rowNumber);
+			row.createCell(0).setCellValue(it.next().getTitle());
+			rowNumber ++;
+		}
+		
+		FileOutputStream output = null;
+		try {
+			output = new FileOutputStream(System.getProperty("user.dir")
+					+ "/res/papers_C_A_Title.xls");
 			workBook.write(output);
 			output.flush();
 		} catch (FileNotFoundException e) {

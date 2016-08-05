@@ -18,7 +18,7 @@ public class TitleFilter implements IFilter{
 	
 	public TitleFilter(String configPath) throws IOException{
 		if(configPath == null){
-			configPath = System.getProperty("user.dir") + "/res/keywords.config";
+			configPath = System.getProperty("user.dir") + "/res/titlefilter.config";
 		}
 		
 		//read configs
