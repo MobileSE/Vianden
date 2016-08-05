@@ -117,14 +117,8 @@ public class SearchEngine {
 	private List<Paper> getPapers(String url, String type, String venue) {
 		List<Paper> list = new ArrayList<Paper>();
 
-		Document doc = null;
-		try {
-			doc = this.accesssUrlContent(url);
-			//Access each website every 3 seconds, in case of being forbidden by the web
-			Thread.sleep(AgentInfo.getSLEEP_TIME());  
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
+		Document doc = this.accesssUrlContent(url);;
+
 		if (doc == null) {
 			System.out.println("--Failed to access the website of " + url);
 			return null;
