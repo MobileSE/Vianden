@@ -36,8 +36,8 @@ public class IETCrawlerTest {
 		//construct paper
 		String urlIET = pp.getProperty("urlIET");
 		paper = new Paper();
-		paper.setpDoi(urlIET);
-		paper.setpPublisher(Publisher.IET);
+		paper.setDoi(urlIET);
+		paper.setPublisher(Publisher.IET);
 		
 		//initialize crawler
 		crawler = new IETCrawler(paper);
@@ -48,12 +48,12 @@ public class IETCrawlerTest {
 		crawler.crawl();
 		crawler.finishCrawl();
 		
-		assertEquals(tAbstract, paper.getpAbstract());
-		assertEquals(tKeywords, paper.getpKeywords());
-		assertEquals(tPdfurl, paper.getpPdfUrl());
-		assertEquals(tPages, paper.getpPages());
-		assertEquals(tReferences, paper.getpReferences().toString());
-		assertEquals(tAuthors, paper.getpAuthors().toString());
+		assertEquals(tAbstract, paper.getAbstract());
+		assertEquals(tKeywords, paper.getKeywords());
+		assertEquals(tPdfurl, paper.getPdfUrl());
+		assertEquals(tPages, paper.getPages());
+		assertEquals(tReferences, paper.getReferences().toString());
+		assertEquals(tAuthors, paper.getAuthors().toString());
 	}
 
 }

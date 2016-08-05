@@ -6,6 +6,7 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import org.vianden.config.AgentInfo;
 import org.vianden.model.Paper;
 
 public class WileyCrawler extends AbstractCrawler {
@@ -35,8 +36,8 @@ public class WileyCrawler extends AbstractCrawler {
 		Element refWiley = doc.select(".tabbedContent").first().getElementsByTag("a").get(1);
 		//can not get absolute address via .attr("abs:href")
 		String refWileyUrl = "http://onlinelibrary.wiley.com" + refWiley.attr("href");
-		Document reWileyDoc = Jsoup.connect(refWileyUrl).userAgent("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_5) AppleWebKit/601.6.17 (KHTML, like Gecko) Version/9.1.1 Safari/601.6.17")
-				.timeout(10000).get();
+		Document reWileyDoc = Jsoup.connect(refWileyUrl).userAgent(AgentInfo.getUSER_AGENT())
+				.timeout(AgentInfo.getTIME_OUT()).get();
 		Elements refsWiley = reWileyDoc.getElementById("fulltext").getElementsByTag("cite");
 		
 		for(Element refinfo : refsWiley){

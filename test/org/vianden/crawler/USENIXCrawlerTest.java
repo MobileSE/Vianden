@@ -32,8 +32,8 @@ public class USENIXCrawlerTest {
 		//construct paper
 		String urlUSENIX = pp.getProperty("urlUSENIX");
 		paper = new Paper();
-		paper.setpDoi(urlUSENIX);
-		paper.setpPublisher(Publisher.USENIX);
+		paper.setDoi(urlUSENIX);
+		paper.setPublisher(Publisher.USENIX);
 		
 		//initialize crawler
 		crawler = new USENIXCrawler(paper);
@@ -44,10 +44,10 @@ public class USENIXCrawlerTest {
 		crawler.crawl();
 		crawler.finishCrawl();
 		
-		assertEquals(tAbstract, paper.getpAbstract());
-		assertEquals(tPdfurl, paper.getpPdfUrl());
-		assertEquals(tPages, paper.getpPages());
-		assertEquals(tAuthors, paper.getpAuthors().toString());
+		assertEquals(tAbstract, paper.getAbstract());
+		assertEquals(tPdfurl, paper.getPdfUrl());
+		assertEquals(tPages, paper.getPages());
+		assertEquals(tAuthors, paper.getAuthors().toString());
 	}
 
 }

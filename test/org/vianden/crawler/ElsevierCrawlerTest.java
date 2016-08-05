@@ -34,8 +34,8 @@ public class ElsevierCrawlerTest {
 		//construct paper
 		String urlElsevier = pp.getProperty("urlElsevier");
 		paper = new Paper();
-		paper.setpDoi(urlElsevier);
-		paper.setpPublisher(Publisher.ELSEVIER);
+		paper.setDoi(urlElsevier);
+		paper.setPublisher(Publisher.ELSEVIER);
 		
 		//initialize crawler
 		crawler = new ElsevierCrawler(paper);
@@ -46,11 +46,11 @@ public class ElsevierCrawlerTest {
 		crawler.crawl();
 		crawler.finishCrawl();
 		
-		assertEquals(tAbstract, paper.getpAbstract());
-		assertEquals(tKeywords, paper.getpKeywords());
-		assertEquals(tPdfurl, paper.getpPdfUrl());
-		assertEquals(tPages, paper.getpPages());
-		assertEquals(tAuthors, paper.getpAuthors().toString());
+		assertEquals(tAbstract, paper.getAbstract());
+		assertEquals(tKeywords, paper.getKeywords());
+		assertEquals(tPdfurl, paper.getPdfUrl());
+		assertEquals(tPages, paper.getPages());
+		assertEquals(tAuthors, paper.getAuthors().toString());
 	}
 
 }

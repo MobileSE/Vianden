@@ -41,7 +41,7 @@ public class TitleFilter implements IFilter{
 	public boolean filter(Paper paper) {
 		
 		for(int i=0; i<filterwords.size(); ++i){
-			if(paper.getpTitle().contains(filterwords.get(i))){
+			if(paper.getTitle().contains(filterwords.get(i))){
 				return true;
 			}
 		}

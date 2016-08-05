@@ -39,7 +39,7 @@ public class AbstractFilter implements IFilter {
 
 	@Override
 	public boolean filter(Paper paper) {
-		String pAbstract = paper.getpAbstract().toLowerCase();
+		String pAbstract = paper.getAbstract().toLowerCase();
 		
 		//start filtering
 		//if abstract contains certain words, it must be filtered

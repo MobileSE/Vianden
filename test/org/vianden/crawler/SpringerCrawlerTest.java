@@ -38,8 +38,8 @@ public class SpringerCrawlerTest {
 		//construct paper
 		String urlSpringer = pp.getProperty("urlSpringer");
 		paper = new Paper();
-		paper.setpDoi(urlSpringer);
-		paper.setpPublisher(Publisher.SPRINGER);
+		paper.setDoi(urlSpringer);
+		paper.setPublisher(Publisher.SPRINGER);
 		
 		//initialize crawler
 		crawler = new SpringerCrawler(paper);
@@ -50,13 +50,13 @@ public class SpringerCrawlerTest {
 		crawler.crawl();
 		crawler.finishCrawl();
 		
-		assertEquals(tAbstract, paper.getpAbstract());
-		assertEquals(tEmail, paper.getpEmail());
-		assertEquals(tKeywords, paper.getpKeywords());
-		assertEquals(tPdfurl, paper.getpPdfUrl());
-		assertEquals(tPages, paper.getpPages());
-		assertEquals(tReferences, paper.getpReferences().toString());
-		assertEquals(tAuthors, paper.getpAuthors().toString());
+		assertEquals(tAbstract, paper.getAbstract());
+		assertEquals(tEmail, paper.getEmail());
+		assertEquals(tKeywords, paper.getKeywords());
+		assertEquals(tPdfurl, paper.getPdfUrl());
+		assertEquals(tPages, paper.getPages());
+		assertEquals(tReferences, paper.getReferences().toString());
+		assertEquals(tAuthors, paper.getAuthors().toString());
 	}
 
 }

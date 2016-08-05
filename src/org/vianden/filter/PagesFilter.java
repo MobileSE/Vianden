@@ -15,12 +15,12 @@ public class PagesFilter implements IFilter {
 	
 	@Override
 	public boolean filter(Paper paper) {
-		//get standard of minimum pages
-		int minPages = Publisher.isSingleColumn(paper.getpPublisher()) ? minSingleColumnPages : minDoubleColumnPages;
+		int minPages = Publisher.isSingleColumn(paper.getPublisher()) ? minSingleColumnPages : minDoubleColumnPages;
 		
+		if(paper.getPages()!=null){
+			int pages = Integer.valueOf(paper.getPages());
+		//get standard of minimum pages
 		//judge whether filtered
-		if(paper.getpPages()!=null){
-			int pages = Integer.valueOf(paper.getpPages());
 			if(pages<minPages){
 				return true;
 			}
