@@ -68,6 +68,7 @@ public class SearchEngine {
 			doc = this.accesssUrlContent(dblpUrl);
 			if (doc == null) {
 				index ++;
+				System.out.println("Failed to access the website of " + dblpUrl);
 				continue;
 			}
 			this.analysisDocument(paperForCrawlList, dblpUrl, doc, startingYear, currentYear);
@@ -94,9 +95,11 @@ public class SearchEngine {
 		Document doc = null;
 		try {
 			doc = Jsoup.connect(url).userAgent(AgentInfo.getUSER_AGENT()).timeout(AgentInfo.getTIME_OUT()).get();
+			Thread.sleep(AgentInfo.getSLEEP_TIME());
 		} catch (IOException e) {
-			System.out.println("Failed to access the website of " + url);
 			doc = null;
+		} catch (InterruptedException e) {
+			e.printStackTrace();
 		}
 		return doc;
 	}
@@ -114,7 +117,14 @@ public class SearchEngine {
 	private List<Paper> getPapers(String url, String type, String venue) {
 		List<Paper> list = new ArrayList<Paper>();
 
-		Document doc = this.accesssUrlContent(url);
+		Document doc = null;
+		try {
+			doc = this.accesssUrlContent(url);
+			//Access each website every 3 seconds, in case of being forbidden by the web
+			Thread.sleep(AgentInfo.getSLEEP_TIME());  
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
 		if (doc == null) {
 			System.out.println("--Failed to access the website of " + url);
 			return null;
@@ -241,7 +251,7 @@ public class SearchEngine {
 		Iterator<String> iterator = keywordsList.iterator();
 		while (iterator.hasNext()) {
 			String keywords = iterator.next().trim();
-			regaxList.add("(" + keywords.replaceAll(",", "|") + ")");
+			regaxList.add("(" + keywords.replaceAll(";", "|") + ")");
 		}
 		return regaxList;
 	}

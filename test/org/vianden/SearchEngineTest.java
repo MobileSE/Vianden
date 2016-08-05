@@ -16,27 +16,17 @@ public class SearchEngineTest {
 		SearchEngine se = new SearchEngine();
 		// We can delete some papers in which title does not contain the
 		// keywords.
-		List<Paper> papers = se.search(1998); // 1997: NPE, 1998: OK.
+		List<Paper> papers = se.search(1950);
 
 		//int count = 0;
 		System.out.println(papers.size());
 		createSheet_T(papers);
-		 for (Paper p : papers)
-		 {
-//		 count++;
-		 // if (count < 10)
-		 // {
-		 // continue;
-		 // }
-		 p = se.refine(p);
-//		 System.out.println("--" + p.getpAbstract());
-//		 System.out.println("--" + p.getpAuthors());
-//		 System.out.println(count + "\n");
-		
-		 //break;
-		 }
-
-createSheet(papers);
+//		for (Paper p : papers)
+//		 {
+//			 p = se.refine(p);
+//		 }
+//
+//		 createSheet(papers);
 	}
 
 	@SuppressWarnings("resource")
