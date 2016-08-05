@@ -90,6 +90,7 @@ public class SearchEngine {
 		return paperlist;
 	}
 
+<<<<<<< HEAD
 	private Document accesssUrlContent(String url) {
 		Document doc = null;
 		try {
@@ -97,6 +98,52 @@ public class SearchEngine {
 		} catch (IOException e) {
 			System.out.println("Failed to access the website of " + url);
 			doc = null;
+=======
+
+	/**
+	 * To refill the missing attributes (e.g., abstract, author affiliation,
+	 * etc.) of a given paper
+	 * 
+	 * @param paper
+	 * @return the enriched version of the given paper
+	 * @throws Exception
+	 */
+	public Paper refine(Paper paper) throws Exception {
+		AbstractCrawler crawler = null;
+
+		switch (paper.getPublisher()) {
+		case Publisher.ACM:
+			crawler = new ACMCrawler(paper);
+			break;
+		case Publisher.IEEE:
+			crawler = new IEEECrawler(paper);
+			break;
+		case Publisher.SPRINGER:
+			crawler = new SpringerCrawler(paper);
+			break;
+		case Publisher.ELSEVIER:
+			crawler = new ElsevierCrawler(paper);
+			break;
+		case Publisher.WILEY:
+			crawler = new WileyCrawler(paper);
+			break;
+		case Publisher.USENIX:
+			crawler = new USENIXCrawler(paper);
+			break;
+		case Publisher.IET:
+			crawler = new IETCrawler(paper);
+			break;
+		default:
+			//dbType=-1, no doi and do nothing
+			break;
+		}
+
+		if (crawler != null) {
+			// crawling
+			crawler.crawl();
+			// set data to paper
+			crawler.finishCrawl();
+>>>>>>> 302b72eb628a966146a0b213f73727b1438f864b
 		}
 		return doc;
 	}
@@ -149,6 +196,7 @@ public class SearchEngine {
 				authorlist.add(author);
 			}
 			// get doi
+<<<<<<< HEAD
 			String doi;
 			try {
 				doi = ele.select(".publ").select(".head").get(0).getElementsByTag("a").first().attr("href");
@@ -156,9 +204,19 @@ public class SearchEngine {
 				e.printStackTrace();
 				continue;
 			}
+=======
+			Element doiEle = ele.select(".publ").select(".head").get(0);
+			String doi = null;
+			if(doiEle.getElementsByTag("a").first() != null && doiEle.getElementsByTag("a").first().hasAttr("href")){
+				doi = doiEle.getElementsByTag("a").first().attr("href");
+			}
+			
+>>>>>>> 302b72eb628a966146a0b213f73727b1438f864b
 			// get database type by doi number
 			int dbtype = -1;
-			if (doi.contains("10.1145")) {
+			if(doi == null){
+				//do nothing
+			}else if (doi.contains("10.1145")) {
 				dbtype = Publisher.ACM;
 			} else if (doi.contains("10.1109")) {
 				dbtype = Publisher.IEEE;
