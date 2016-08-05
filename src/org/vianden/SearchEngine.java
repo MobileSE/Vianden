@@ -120,6 +120,7 @@ public class SearchEngine {
 			absCrawler = new IETCrawler(paper);
 			break;
 		default:
+			//dbType=-1, no doi and do nothing
 			break;
 		}
 
@@ -184,10 +185,17 @@ public class SearchEngine {
 				authorlist.add(author);
 			}
 			// get doi
-			String doi = ele.select(".publ").select(".head").get(0).getElementsByTag("a").first().attr("href");
+			Element doiEle = ele.select(".publ").select(".head").get(0);
+			String doi = null;
+			if(doiEle.getElementsByTag("a").first() != null && doiEle.getElementsByTag("a").first().hasAttr("href")){
+				doi = doiEle.getElementsByTag("a").first().attr("href");
+			}
+			
 			// get database type by doi number
 			int dbtype = -1;
-			if (doi.contains("10.1145")) {
+			if(doi == null){
+				//do nothing
+			}else if (doi.contains("10.1145")) {
 				dbtype = Publisher.ACM;
 			} else if (doi.contains("10.1109")) {
 				dbtype = Publisher.IEEE;
