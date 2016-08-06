@@ -3,7 +3,7 @@ package org.vianden.config;
 public class AgentInfo {
 	private static final String USER_AGENT = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_5) AppleWebKit/601.6.17 (KHTML, like Gecko) Version/9.1.1 Safari/601.6.17";
 	private static final int TIME_OUT = 10000000;
-	private static final int SLEEP_TIME = 3000;
+	private static final int SLEEP_TIME = 1000;
 	
 	public AgentInfo() {
 	}
