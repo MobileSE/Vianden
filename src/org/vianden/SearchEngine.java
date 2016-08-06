@@ -82,15 +82,16 @@ public class SearchEngine {
 		for(int i = 0; i< paperForCrawlList.size(); ++i){
 			Map<String, String> map = paperForCrawlList.get(i);
 			String url = map.get("url");
+			String type = map.get("type");
 			String venue = map.get("venue");
 			
 			// get papers of each conference and journals
-			List<Paper> list = this.getPapers(url, venue);
+			List<Paper> list = this.getPapers(url, type, venue);
 			if (list != null) {
 				paperlist.addAll(list);
 			}
 			
-			System.out.println("The "+(i+1)+"th paper of The Total " + paperForCrawlList.size() +" papers");
+			System.out.println("The "+(i+1)+"th paper of The Total " + paperForCrawlList.size() +" venues. papers size:" + paperlist.size());
 		}
 
 		return paperlist;
@@ -127,7 +128,7 @@ public class SearchEngine {
 	 * @return the papers list of the single journal or conference
 	 * @throws Exception
 	 */
-	private List<Paper> getPapers(String url, String venue) {
+	private List<Paper> getPapers(String url, String type, String venue) {
 		//if url=null, return
 		if(url == null){
 			String errorMsg = "url:" + url + " = null, " + " venue:" + venue;
@@ -147,18 +148,19 @@ public class SearchEngine {
 			System.out.println(errorMsg);
 			return null;
 		}
-		Elements entries = doc.select(".entry");
+		Elements entries = doc.select(".entry."+type);
 		System.out.println("get Paper:"+url+" num:"+entries.size());
 		for (Element ele : entries) {
 			Element data = ele.getElementsByClass("data").first();
 			// get title
 			String title = null;
 			try {
-				if(data.hasClass("title")){
-					title = data.getElementsByClass("title").text();
+				Elements titleEle = data.getElementsByClass("title");
+				if(titleEle != null){
+					title = titleEle.text();
 				}
 			} catch (NullPointerException e1) {
-				String errorMsg = "data"+data +" url:" + url;
+				String errorMsg = "data:"+data +" url:" + url;
 				this.errorList.add(errorMsg);
 				System.out.println(errorMsg);
 				continue;
@@ -184,7 +186,7 @@ public class SearchEngine {
 				
 			} catch (NullPointerException e) {
 				e.printStackTrace();
-				String errorMsg = "Failed to find the element (itemprop=datePublished) at "+url;
+				String errorMsg = "getPaper:Failed to find the element (itemprop=datePublished) at "+url;
 				this.errorList.add(errorMsg);
 				System.out.println(errorMsg);
 				continue;
@@ -236,6 +238,7 @@ public class SearchEngine {
 			 * The value (boolean filter) decides whether we filter the papers before refine method or not.
 			 *  
 			 */
+			
 			if (title != null && filterByKeyword(title)) {
 				// construct paper with obtained information
 				Paper paper = new Paper();
@@ -325,6 +328,7 @@ public class SearchEngine {
 							String url = a.attr("href");
 							Map<String, String> map = new HashMap<String, String>();
 							map.put("url", url);
+							map.put("type", "article");
 							map.put("venue", venue);
 							paperForCrawlList.add(map);
 						}
@@ -361,9 +365,10 @@ public class SearchEngine {
 						}
 						
 					} catch (NullPointerException e) {
-						String errorMsg = "Failed to find the element (itemprop=datePublished) at " + dblpUrl;
+						String errorMsg = "analysisDoc:Failed to find the element (itemprop=datePublished) at " + dblpUrl;
 						this.errorList.add(errorMsg);
 						System.out.println(errorMsg);
+						System.out.println(ele);
 						continue;
 					}
 					// get detail conference paper list
@@ -381,6 +386,7 @@ public class SearchEngine {
 					if (year >= startYear || year == 0) {
 						Map<String, String> map = new HashMap<String, String>();
 						map.put("url", cUrl);
+						map.put("type", "inproceedings");
 						map.put("venue", venue);
 						paperForCrawlList.add(map);
 					}
