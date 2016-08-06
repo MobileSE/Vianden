@@ -118,7 +118,7 @@ public class SearchEngine {
 		List<Paper> list = new ArrayList<Paper>();
 
 		Document doc = this.accesssUrlContent(url);;
-
+		
 		if (doc == null) {
 			System.out.println("--Failed to access the website of " + url);
 			return null;
