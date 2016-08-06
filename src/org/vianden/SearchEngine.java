@@ -32,6 +32,7 @@ import org.vianden.model.Paper;
 public class SearchEngine {
 	
 	private static List<String> urls = null;
+	private List<String> errorList = null;
 	
 
 	/**
@@ -50,6 +51,7 @@ public class SearchEngine {
 	public List<Paper> search(int startingYear) {
 		List<Paper> paperlist = new ArrayList<Paper>();
 		urls = ReadConfigFile.readConfigFile(FilePathes.DBLP_CONFIG);
+		errorList = new ArrayList<String>();
 		
 		if (urls.size() == 1 && urls.listIterator().next() == ReadConfigFile.FNFExpStr) {
 			System.out.println(ReadConfigFile.FNFExpStr);
@@ -68,7 +70,9 @@ public class SearchEngine {
 			doc = this.accesssUrlContent(dblpUrl);
 			if (doc == null) {
 				index ++;
-				System.out.println("Failed to access the website of " + dblpUrl);
+				String errorMsg = "Failed to access the website of " + dblpUrl;
+				this.errorList.add(errorMsg);
+				System.out.println(errorMsg);
 				continue;
 			}
 			this.analysisDocument(paperForCrawlList, dblpUrl, doc, startingYear, currentYear);
@@ -86,20 +90,30 @@ public class SearchEngine {
 			if (list != null) {
 				paperlist.addAll(list);
 			}
+			
+			System.out.println("The "+(i+1)+"th paper of The Total " + paperForCrawlList.size() +" venues. papers size:" + paperlist.size());
 		}
 
 		return paperlist;
 	}
 
 	private Document accesssUrlContent(String url) {
+		
+		if(url == null){
+			return null;
+		}
+		
 		Document doc = null;
 		try {
 			doc = Jsoup.connect(url).userAgent(AgentInfo.getUSER_AGENT()).timeout(AgentInfo.getTIME_OUT()).get();
-			Thread.sleep(AgentInfo.getSLEEP_TIME());
+//			Thread.sleep(AgentInfo.getSLEEP_TIME());
 		} catch (IOException e) {
 			doc = null;
-		} catch (InterruptedException e) {
-			e.printStackTrace();
+			String errorMsg = "Invalid url:" + url;
+			this.errorList.add(errorMsg);
+			System.out.println(errorMsg);
+//		} catch (InterruptedException e) {
+//			e.printStackTrace();
 		}
 		return doc;
 	}
@@ -115,37 +129,69 @@ public class SearchEngine {
 	 * @throws Exception
 	 */
 	private List<Paper> getPapers(String url, String type, String venue) {
-		List<Paper> list = new ArrayList<Paper>();
-
-		Document doc = this.accesssUrlContent(url);;
-		
-		if (doc == null) {
-			System.out.println("--Failed to access the website of " + url);
+		//if url=null, return
+		if(url == null){
+			String errorMsg = "url:" + url + " = null, " + " venue:" + venue;
+			this.errorList.add(errorMsg);
 			return null;
 		}
-		Elements entries = doc.select(".entry").select("." + type);
+		
+		List<Paper> list = new ArrayList<Paper>();
 
+		Document doc = null;
+		
+		doc = this.accesssUrlContent(url);
+		
+		if (doc == null) {
+			String errorMsg = "--Failed to access the website of " + url;
+			this.errorList.add(errorMsg);
+			System.out.println(errorMsg);
+			return null;
+		}
+		Elements entries = doc.select(".entry."+type);
+		System.out.println("get Paper:"+url+" num:"+entries.size());
 		for (Element ele : entries) {
 			Element data = ele.getElementsByClass("data").first();
 			// get title
-			String title;
+			String title = null;
 			try {
-				title = data.getElementsByClass("title").text();
+				Elements titleEle = data.getElementsByClass("title");
+				if(titleEle != null){
+					title = titleEle.text();
+				}
 			} catch (NullPointerException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
+				String errorMsg = "data:"+data +" url:" + url;
+				this.errorList.add(errorMsg);
+				System.out.println(errorMsg);
 				continue;
 			}
 			// get year
-			Elements eYear = data.getElementsByAttributeValue("itemprop", "datePublished");
-			String year = "";
+			String year = null;
+			Element eYear = null;
 			try {
-				year = eYear.first().attr("content");
-			} catch (Exception e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
+				Elements props = ele.getElementsByAttribute("itemprop");
+				
+				for(Element prop : props){
+					String value = prop.attr("itemprop");
+					if(value.equals("datePublished")){
+						eYear = prop;
+						if(prop.hasText()){
+							year = eYear.text();
+						}else{
+							year = eYear.attr("content");
+						}
+						break;
+					}
+				}
+				
+			} catch (NullPointerException e) {
+				e.printStackTrace();
+				String errorMsg = "getPaper:Failed to find the element (itemprop=datePublished) at "+url;
+				this.errorList.add(errorMsg);
+				System.out.println(errorMsg);
 				continue;
 			}
+			
 			// get authors
 			Elements authors = data.getElementsByAttributeValue("itemprop", "author");
 			List<Author> authorlist = new ArrayList<Author>();
@@ -192,7 +238,8 @@ public class SearchEngine {
 			 * The value (boolean filter) decides whether we filter the papers before refine method or not.
 			 *  
 			 */
-			if (filterByKeyword(title)) {
+			
+			if (title != null && filterByKeyword(title)) {
 				// construct paper with obtained information
 				Paper paper = new Paper();
 				paper.setYear(year);
@@ -202,6 +249,7 @@ public class SearchEngine {
 				paper.setVenue(venue);
 				paper.setPublisher(dbtype);
 
+				System.out.println("Paper:"+paper.getTitle());
 				// add paper to list
 				list.add(paper);	
 			}
@@ -290,39 +338,65 @@ public class SearchEngine {
 			}
 
 		} else if (dblpUrl.contains("db/conf")) {
-			Elements eles = doc.select(".entry");
+			try{
+				Elements eles = doc.select(".entry");
+				
+				String venue = doc.select(".headline").select(".noline").first().text();
 
-			String venue = doc.select(".headline").select(".noline").first().text();
-
-			for (Element ele : eles) {
-				Element eData = ele.getElementsByClass("data").first();
-				// get year
-				int year = 0;
-				Elements eYear;
-				try {
-					eYear = eData.getElementsByAttributeValue("itemprop", "datePublished");
-				} catch (NullPointerException e) {
-					System.out.println("Failed to find the element (itemprop=datePublished)");
-					continue;
+				for (Element ele : eles) {
+					Element eData = ele.getElementsByClass("data").first();
+					// get year
+					int year = 0;
+					Element eYear = null;
+					try {
+						Elements props = eData.getElementsByAttribute("itemprop");
+						
+						for(Element prop : props){
+							String value = prop.attr("itemprop");
+							if(value.equals("datePublished")){
+								eYear = prop;
+								if(prop.hasText()){
+									year = Integer.valueOf(eYear.text());
+								}else{
+									year = Integer.valueOf(eYear.attr("content"));
+								}
+								break;
+							}
+						}
+						
+					} catch (NullPointerException e) {
+						String errorMsg = "analysisDoc:Failed to find the element (itemprop=datePublished) at " + dblpUrl;
+						this.errorList.add(errorMsg);
+						System.out.println(errorMsg);
+						System.out.println(ele);
+						continue;
+					}
+					// get detail conference paper list
+					String cUrl = null;
+					try {
+						Element cUrlEle = ele.select(".publ").select(".head").get(0);
+						if(cUrlEle.getElementsByTag("a").first() != null && cUrlEle.getElementsByTag("a").first().hasAttr("href")){
+							cUrl = cUrlEle.getElementsByTag("a").first().attr("href");
+						}
+					} catch (NullPointerException e) {
+						System.out.println(e.getMessage());
+						continue;
+					}
+					// get papers from starting year
+					if (year >= startYear || year == 0) {
+						Map<String, String> map = new HashMap<String, String>();
+						map.put("url", cUrl);
+						map.put("type", "inproceedings");
+						map.put("venue", venue);
+						paperForCrawlList.add(map);
+					}
 				}
-				year = Integer.valueOf(eYear.first().text());
-				// get detail conference paper list
-				String cUrl;
-				try {
-					cUrl = ele.select(".publ").select(".head").get(0).getElementsByTag("a").first().attr("href");
-				} catch (NullPointerException e) {
-					e.printStackTrace();
-					continue;
-				}
-				// get papers from starting year
-				if (year >= startYear) {
-					Map<String, String> map = new HashMap<String, String>();
-					map.put("url", cUrl);
-					map.put("type", "inproceedings");
-					map.put("venue", venue);
-					paperForCrawlList.add(map);
-				}
+			}catch(NullPointerException e){
+				String errorMsg = "NullPointerException for entry dblpUrl:"+dblpUrl;
+				this.errorList.add(errorMsg);
+				System.out.println(errorMsg);
 			}
+			
 		}
 		
 	}

@@ -4,5 +4,8 @@ import org.vianden.model.Paper;
 
 public interface IFilter 
 {
-	public boolean filter(Paper paper);
+	//exclude papers that satisfied the exclude conditions
+	public boolean excludeFilter(Paper paper);
+	//include papers that satisfied the include conditions
+	public boolean includeFilter(Paper paper);
 }

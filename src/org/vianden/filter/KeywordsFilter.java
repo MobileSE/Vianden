@@ -42,7 +42,7 @@ public class KeywordsFilter implements IFilter {
 	}
 	
 	@Override
-	public boolean filter(Paper paper) 
+	public boolean excludeFilter(Paper paper) 
 	{
 		String[] keyArr = paper.getKeywords().split(";");
 		
@@ -55,6 +55,12 @@ public class KeywordsFilter implements IFilter {
 			}
 		}
 		
+		return false;
+	}
+
+	@Override
+	public boolean includeFilter(Paper paper) {
+		// TODO Auto-generated method stub
 		return false;
 	}
 

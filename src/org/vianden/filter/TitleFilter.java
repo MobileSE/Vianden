@@ -38,7 +38,21 @@ public class TitleFilter implements IFilter{
 	}
 
 	@Override
-	public boolean filter(Paper paper) {
+	public boolean excludeFilter(Paper paper) {
+		boolean isFiltered = false;
+		
+		for(int i=0; i<filterwords.size(); ++i){
+			if(paper.getTitle().contains(filterwords.get(i))){
+				isFiltered = true;
+				return isFiltered;
+			}
+		}
+		
+		return false;
+	}
+
+	@Override
+	public boolean includeFilter(Paper paper) {
 		
 		for(int i=0; i<filterwords.size(); ++i){
 			if(paper.getTitle().contains(filterwords.get(i))){
