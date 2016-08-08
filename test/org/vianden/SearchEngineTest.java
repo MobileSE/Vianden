@@ -12,6 +12,7 @@ import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.vianden.model.Paper;
 
 public class SearchEngineTest {
+	
 	public static void main(String[] args) throws Exception {
 		SearchEngine se = new SearchEngine();
 		// We can delete some papers in which title does not contain the

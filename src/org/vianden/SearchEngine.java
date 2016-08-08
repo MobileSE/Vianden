@@ -91,7 +91,7 @@ public class SearchEngine {
 				paperlist.addAll(list);
 			}
 			
-			System.out.println("The "+(i+1)+"th paper of The Total " + paperForCrawlList.size() +" venues. papers size:" + paperlist.size());
+			System.out.println("The "+(i+1)+"th venue of The Total " + paperForCrawlList.size() +" venues. papers size:" + paperlist.size());
 		}
 
 		return paperlist;
@@ -149,7 +149,7 @@ public class SearchEngine {
 			return null;
 		}
 		Elements entries = doc.select(".entry."+type);
-		System.out.println("get Paper:"+url+" num:"+entries.size());
+		System.out.println("get Paper:"+url+" paper numbers:"+entries.size());
 		for (Element ele : entries) {
 			Element data = ele.getElementsByClass("data").first();
 			// get title
@@ -397,6 +397,10 @@ public class SearchEngine {
 				System.out.println(errorMsg);
 			}
 			
+		}else{
+			String errorMsg = "invalid url:" + dblpUrl ;
+			System.out.println(errorMsg);
+			errorList.add(errorMsg);
 		}
 		
 	}
