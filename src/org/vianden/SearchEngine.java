@@ -112,6 +112,8 @@ public class SearchEngine {
 			String errorMsg = "Invalid url:" + url;
 			this.errorList.add(errorMsg);
 			System.out.println(errorMsg);
+			
+			e.printStackTrace();
 //		} catch (InterruptedException e) {
 //			e.printStackTrace();
 		}
@@ -445,11 +447,14 @@ public class SearchEngine {
 
 		if (crawler != null) {
 			// crawling
+			crawler.commonCrawl();
 			crawler.crawl();
 			// set data to paper
 			crawler.finishCrawl();
 		}
 
+		System.out.println("refine paper finished!");
+		
 		return paper;
 	}
 }

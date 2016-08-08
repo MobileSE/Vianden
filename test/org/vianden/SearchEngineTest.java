@@ -22,12 +22,15 @@ public class SearchEngineTest {
 		//int count = 0;
 		System.out.println(papers.size());
 		createSheet_T(papers);
-//		for (Paper p : papers)
-//		 {
-//			 p = se.refine(p);
-//		 }
-//
-//		 createSheet(papers);
+		
+		for (Paper p : papers)
+		 {
+			 p = se.refine(p);
+		 }
+
+		 createSheet(papers);
+		 
+		 System.out.println("Finished!");
 	}
 
 	@SuppressWarnings("resource")
@@ -50,19 +53,20 @@ public class SearchEngineTest {
 		Iterator<Paper> it = papers.iterator();
 		int rowNumber = 1;
 		while (it.hasNext()) {
+			Paper paper = it.next();
 			row = sheet.createRow(rowNumber);
-			row.createCell(0).setCellValue(it.next().getTitle());
-			row.createCell(1).setCellValue(it.next().getAllAuthorsName());
-			row.createCell(2).setCellValue(it.next().getYear());
-			row.createCell(3).setCellValue(it.next().getDoi());
-			row.createCell(4).setCellValue(it.next().getVenue());
-			row.createCell(5).setCellValue(it.next().getPublisher());
-			row.createCell(6).setCellValue(it.next().getAbstract());
-			row.createCell(7).setCellValue(it.next().getPages());
-			row.createCell(8).setCellValue(it.next().getEmail());
-			row.createCell(9).setCellValue(it.next().getKeywords());
-			row.createCell(10).setCellValue(it.next().getPdfUrl());
-//			row.createCell(11).setCellValue(it.next().getReferences());
+			row.createCell(0).setCellValue(paper.getTitle());
+			row.createCell(1).setCellValue(paper.getAllAuthorsName());
+			row.createCell(2).setCellValue(paper.getYear());
+			row.createCell(3).setCellValue(paper.getDoi());
+			row.createCell(4).setCellValue(paper.getVenue());
+			row.createCell(5).setCellValue(paper.getPublisher());
+			row.createCell(6).setCellValue(paper.getAbstract());
+			row.createCell(7).setCellValue(paper.getPages());
+			row.createCell(8).setCellValue(paper.getEmail());
+			row.createCell(9).setCellValue(paper.getKeywords());
+			row.createCell(10).setCellValue(paper.getPdfUrl());
+//			row.createCell(11).setCellValue(paper.getReferences());
 			rowNumber ++;
 		}
 		

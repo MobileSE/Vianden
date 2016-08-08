@@ -4,10 +4,9 @@ import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
-import org.vianden.config.AgentInfo;
 import org.vianden.model.Author;
 import org.vianden.model.Paper;
 
@@ -65,25 +64,29 @@ public class ACMCrawler extends AbstractCrawler {
 			String refsuffix = desStr.substring(refstart, refend);
 			
 			//get abstract
-			Elements ps = Jsoup.connect(prefix + abssuffix).userAgent(AgentInfo.getUSER_AGENT())
-					.timeout(AgentInfo.getTIME_OUT()).get().getElementsByTag("p");
-			if(ps.size()>0){
-				abstractStr = ps.first().text();
+			Document absDoc = this.accesssUrlContent(prefix + abssuffix);
+			if(absDoc != null){
+				Elements ps = absDoc.getElementsByTag("p");
+				if(ps.size()>0){
+					abstractStr = ps.first().text();
+				}
 			}
 //			System.out.println(abssuffix);
 //			System.out.println(refsuffix);
 			
 			//get references
-			Elements acmrefs = Jsoup.connect(prefix + refsuffix).userAgent(AgentInfo.getUSER_AGENT())
-					.timeout(10000).get().getElementsByTag("tr");
-			if(acmrefs != null){
-				for(Element tr : acmrefs){
-					Element td = tr.getElementsByTag("td").get(2);
-					reference.add(td.text());
-				}
-			}else{
-				System.out.println("ref null");
-			}	
+			Document refDoc = this.accesssUrlContent(prefix + refsuffix);
+			if(refDoc != null){
+				Elements acmrefs = refDoc.getElementsByTag("tr");
+				if(acmrefs != null){
+					for(Element tr : acmrefs){
+						Element td = tr.getElementsByTag("td").get(2);
+						reference.add(td.text());
+					}
+				}else{
+					System.out.println("ref null");
+				}	
+			}
 		}
 	}
 

@@ -42,61 +42,62 @@ public abstract class AbstractCrawler implements ICrawler
 		this.paper = paper;
 		authors = new ArrayList<Author>();
 		reference = new ArrayList<String>();
-		
-		//common part crawl
-		this.commonCrawl();
 	}
 	
-	private void commonCrawl() throws IOException{
-		doc = Jsoup.connect(paper.getDoi())
-				.userAgent(AgentInfo.getUSER_AGENT())
-				.timeout(2 * AgentInfo.getTIME_OUT()).get();
+	public void commonCrawl() throws IOException{
+		doc = this.accesssUrlContent(paper.getDoi());
 		
-		Elements metaEles = doc.getElementsByTag("meta");
-		for(int i=0; i< metaEles.size(); ++i){
-			Element ele = metaEles.get(i);
-			String name = ele.attr("name");
-			if(name.equals("citation_title")){
-				titileStr = ele.attr("content");
-			}else if(name.equals("citation_keywords")){	//keywords:IEEE,IET,ACM
-				keywordsStr = ele.attr("content");
-				keywordsStr = keywordsStr.replaceAll("\t|\r|\n", "");
-			}else if(name.equals("citation_journal_title") || name.equals("citation_conference")){
-				venueStr = ele.attr("content");
-			}else if(name.equals("citation_author_email")){	//email:IEEE, Springer
-				emailStr += ele.attr("content") + ";";
-			}else if(name.equals("citation_pdf_url")){	//pdf:IEEE, Springer, USENIX, ACM
-				pdfUrlStr = ele.attr("content");
-			}else if(name.equals("citation_abstract")){ //citation_abstract:IET
-				abstractStr = ele.attr("content");
-			}else if(name.equals("citation_firstpage")){
-				firstPage = Integer.valueOf(ele.attr("content")); //firstPage:IEEE, Springer, USENIX, Willy, IET, ACM
-			}else if(name.equals("citation_lastpage")){
-				lastPage = Integer.valueOf(ele.attr("content")); //lastPage:IEEE, Springer, USENIX, Willy, IET
-			}else if(name.equals("citation_author")){	//authors:IEEE, Springer, Willy, IET
-				//define informations of author
-				String authorName = ele.attr("content");
-				Set<String> authorInstitutionSet  = new HashSet<String>();
-				//get affiliations
-				for(int j=i+1; j<metaEles.size(); ++j){
-					Element eleInstitution = metaEles.get(j);
-					if(eleInstitution!=null && eleInstitution.attr("name").equals("citation_author_institution")){
-						authorInstitutionSet.add(eleInstitution.attr("content"));
-					}else{
-						break;
+		if(doc != null){
+			Elements metaEles = doc.getElementsByTag("meta");
+			for(int i=0; i< metaEles.size(); ++i){
+				Element ele = metaEles.get(i);
+				String name = ele.attr("name");
+				if(name.equals("citation_title")){
+					titileStr = ele.attr("content");
+				}else if(name.equals("citation_keywords")){	//keywords:IEEE,IET,ACM
+					keywordsStr = ele.attr("content");
+					keywordsStr = keywordsStr.replaceAll("\t|\r|\n", "");
+				}else if(name.equals("citation_journal_title") || name.equals("citation_conference")){
+					venueStr = ele.attr("content");
+				}else if(name.equals("citation_author_email")){	//email:IEEE, Springer
+					emailStr += ele.attr("content") + ";";
+				}else if(name.equals("citation_pdf_url")){	//pdf:IEEE, Springer, USENIX, ACM
+					pdfUrlStr = ele.attr("content");
+				}else if(name.equals("citation_abstract")){ //citation_abstract:IET
+					abstractStr = ele.attr("content");
+				}else if(name.equals("citation_firstpage")){
+					firstPage = Integer.valueOf(ele.attr("content")); //firstPage:IEEE, Springer, USENIX, Willy, IET, ACM
+				}else if(name.equals("citation_lastpage")){
+					lastPage = Integer.valueOf(ele.attr("content")); //lastPage:IEEE, Springer, USENIX, Willy, IET
+				}else if(name.equals("citation_author")){	//authors:IEEE, Springer, Willy, IET
+					//define informations of author
+					String authorName = ele.attr("content");
+					Set<String> authorInstitutionSet  = new HashSet<String>();
+					//get affiliations
+					for(int j=i+1; j<metaEles.size(); ++j){
+						Element eleInstitution = metaEles.get(j);
+						if(eleInstitution!=null && eleInstitution.attr("name").equals("citation_author_institution")){
+							authorInstitutionSet.add(eleInstitution.attr("content"));
+						}else{
+							break;
+						}
 					}
+					//construct author
+					Author author = new Author(authorName, authorInstitutionSet);
+					authors.add(author);
 				}
-				//construct author
-				Author author = new Author(authorName, authorInstitutionSet);
-				authors.add(author);
 			}
+			
+			if(firstPage!=0 && lastPage!=0){
+				pages = lastPage - firstPage + 1;
+			}else if(firstPage!=0 || lastPage!=0){
+				pages = 1;
+			}
+		}else{
+			System.out.println("Null Error:"+paper.getDoi());
 		}
 		
-		if(firstPage!=0 && lastPage!=0){
-			pages = lastPage - firstPage + 1;
-		}else if(firstPage!=0 || lastPage!=0){
-			pages = 1;
-		}
+		
 	}
 	
 	public void finishCrawl(){
@@ -119,5 +120,28 @@ public abstract class AbstractCrawler implements ICrawler
 	public Paper getPaper() 
 	{
 		return paper;
+	}
+	
+	protected Document accesssUrlContent(String url) {
+		
+		if(url == null){
+			return null;
+		}
+		
+		Document doc = null;
+		
+		try {
+			doc = Jsoup.connect(url).userAgent(AgentInfo.getUSER_AGENT()).timeout(AgentInfo.getLONG_TIME_OUT()).get();
+			Thread.sleep(AgentInfo.getSLEEP_TIME());
+		} catch (IOException e) {
+			e.printStackTrace();
+			doc = null;
+			String errorMsg = "Crawler Invalid url:" + url;
+			System.out.println(errorMsg);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		
+		return doc;
 	}
 }
