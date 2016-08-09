@@ -29,7 +29,7 @@ import org.vianden.model.Paper;
 
 public class SearchEngine {
 	
-	private static List<String> urls = null;
+	private List<String> urls = null;
 	private List<String> errorList = null;
 	
 
@@ -144,7 +144,7 @@ public class SearchEngine {
 	 * @param url(journal or conference page url)
 	 * @param type(article or inproceedings)
 	 * @param venue
-	 * @param titleFilter
+	 * @param titleFilter, if titleFilter=null, means no titleFilter will be applied in this search
 	 * @return the papers list of the single journal or conference
 	 * @throws Exception
 	 */

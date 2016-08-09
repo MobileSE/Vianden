@@ -8,7 +8,7 @@ public interface IFilter
 	 * 
 	 * @param paper
 	 * @return true this paper is excluded in paper set
-	 * @return false this paper is keeped in paper set
+	 * @return false this paper is kept/included in paper set
 	 * */
 	public boolean filter(Paper paper);
 }
