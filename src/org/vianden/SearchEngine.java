@@ -28,8 +28,13 @@ import org.vianden.model.Publisher;
 import org.vianden.model.Paper;
 
 public class SearchEngine {
-	
-	private List<String> urls = null;
+	/**
+	 *  List of urls from dblp.config
+	 */
+	private List<String> urlsList = null;
+	/**
+	 *  List of errors while searching
+	 */
 	private List<String> errorList = null;
 	
 
@@ -49,10 +54,10 @@ public class SearchEngine {
 	 */
 	public List<Paper> search(int startingYear, TitleFilter titleFilter) {
 		List<Paper> paperlist = new ArrayList<Paper>();
-		urls = ReadConfigFile.readConfigFile(FilePathes.DBLP_CONFIG);
+		urlsList = ReadConfigFile.readConfigFile(FilePathes.DBLP_CONFIG);
 		errorList = new ArrayList<String>();
 		
-		if (urls.size() == 1 && urls.listIterator().next() == ReadConfigFile.FNFExpStr) {
+		if (urlsList.size() == 1 && urlsList.listIterator().next() == ReadConfigFile.FNFExpStr) {
 			System.out.println(ReadConfigFile.FNFExpStr);
 			return null;
 		}
@@ -64,8 +69,8 @@ public class SearchEngine {
 		List<Map<String, String>> paperForCrawlList = new ArrayList<Map<String, String>>();
 		int currentYear = Calendar.getInstance().get(Calendar.YEAR);
 		Document doc = null;
-		for (int index = 0; index < urls.size(); ++index) {
-			String dblpUrl = urls.get(index);
+		for (int index = 0; index < urlsList.size(); ++index) {
+			String dblpUrl = urlsList.get(index);
 			doc = accesssUrlContent(dblpUrl, AgentInfo.TIME_OUT, AgentInfo.SLEEP_TIME);
 			if (doc == null) {
 				index ++;
