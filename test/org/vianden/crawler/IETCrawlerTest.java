@@ -45,6 +45,7 @@ public class IETCrawlerTest {
 
 	@Test
 	public void testCrawl() throws IOException {
+		crawler.commonCrawl();
 		crawler.crawl();
 		crawler.finishCrawl();
 		

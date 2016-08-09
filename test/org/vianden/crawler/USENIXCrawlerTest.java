@@ -41,6 +41,7 @@ public class USENIXCrawlerTest {
 
 	@Test
 	public void testCrawl() throws IOException {
+		crawler.commonCrawl();
 		crawler.crawl();
 		crawler.finishCrawl();
 		

@@ -18,6 +18,7 @@ public class IEEECrawlerTest
 		
 		try {
 			AbstractCrawler crawler = new IEEECrawler(paper);
+			crawler.commonCrawl();
 			crawler.crawl();
 			crawler.finishCrawl();
 			
