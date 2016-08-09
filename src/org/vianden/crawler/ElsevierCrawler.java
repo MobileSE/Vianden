@@ -22,63 +22,122 @@ public class ElsevierCrawler extends AbstractCrawler {
 		Element keywordsElsvier = doc.getElementsByClass("keyword").first();
 		keywordsStr = keywordsElsvier.text();
 		//abstract
-		Element absElsvier = doc.select(".abstract").select(".svAbstract").get(1).getElementsByTag("p").first();
-		abstractStr = absElsvier.text();
+		Elements absEles1 = doc.select(".abstract.svAbstract");
+		Elements absEles2 = doc.select(".abstract.abstract-type-author");
+		Element absElsvier = null;
+		if(absEles1!=null && absEles1.size()>0){
+			absElsvier = absEles1.last().getElementsByTag("p").first();
+		}else if(absEles2!=null && absEles2.size()>0){
+			absElsvier = absEles2.first().getElementsByTag("div").first();
+		}
+		if(absElsvier != null){
+			abstractStr = absElsvier.text();
+		}
 		//affiliations
 		HashMap<String, String> affMap = new HashMap<String, String>();
-		Element affiliations = doc.select(".affiliation").select(".authAffil").first();
-		System.out.println(affiliations.text());
-		Elements afflis = affiliations.getElementsByTag("li");
-		for(Element affli:afflis){
-			String tag = affli.getElementsByTag("sup").first().text();
-			String affName = affli.getElementsByTag("span").first().text();
-			affMap.put(tag, affName);
+		Element affiliations = doc.select(".affiliation.authAffil").first();
+
+		if(affiliations != null){
+			Elements afflis = affiliations.getElementsByTag("li");
+			for(Element affli:afflis){
+				String tag = affli.getElementsByTag("sup").first().text();
+				String affName = affli.getElementsByTag("span").first().text();
+				affMap.put(tag, affName);
+			}
+		}else{
+			affiliations = doc.getElementsByClass("affiliation").first();
+			String affiStr = affiliations.text();
+			
+			int authorsNum = authors.size();
+			String[] affis = affiStr.split(",", authorsNum);
+			
+			for(int i=0; i<authorsNum; ++i){
+				Author author = authors.get(i);
+				Set<String> set = new HashSet<String>();
+				set.add(affis[i]);
+				author.setAffiliation(set);
+			}
+			
 		}
+		
 		//authors
 		Element authorElsvier = doc.select(".authorGroup.noCollab.svAuthor").first();
-		Elements authorElsvierLis = authorElsvier.getElementsByTag("li");
-		for(Element li : authorElsvierLis){
-			String authorName = li.select(".authorName.svAuthor").first().text();
-			//get author affiliations
-			Set<String> authorInstitutionSet  = new HashSet<String>();
-			Elements affs = li.select(".intra_ref.auth_aff");
-			for(Element aff : affs){
-				String tag = aff.text();
-				String institution = affMap.get(tag);
-				authorInstitutionSet.add(institution);
+		if(authorElsvier != null){
+			Elements authorElsvierLis = authorElsvier.getElementsByTag("li");
+			for(Element li : authorElsvierLis){
+				String authorName = li.select(".authorName.svAuthor").first().text();
+				//get author affiliations
+				Set<String> authorInstitutionSet  = new HashSet<String>();
+				Elements affs = li.select(".intra_ref.auth_aff");
+				for(Element aff : affs){
+					String tag = aff.text();
+					String institution = affMap.get(tag);
+					authorInstitutionSet.add(institution);
+				}
+				//add to authors
+				Author author = new Author(authorName, authorInstitutionSet);
+				authors.add(author);
+				
+				//Email
+				Elements emailAs = li.getElementsByClass("auth_mail");
+				for(int i=0; i<emailAs.size(); ++i){
+					Element email = emailAs.get(i);
+					emailStr+=email.attr("href").replace("mailto:", "") + ";";
+				}
 			}
-			//add to authors
-			Author author = new Author(authorName, authorInstitutionSet);
-			authors.add(author);
-			
+		}else{
 			//Email
-			Elements emailAs = li.getElementsByClass("auth_mail");
+			Elements emailAs = doc.getElementsByClass("author-email");
 			for(int i=0; i<emailAs.size(); ++i){
 				Element email = emailAs.get(i);
 				emailStr+=email.attr("href").replace("mailto:", "") + ";";
 			}
 		}
+		
 		//pdfStr
-		pdfUrlStr = doc.getElementById("pdfLink").attr("pdfurl");
+		Element pdfEle1 = doc.getElementById("pdfLink");
+		Element pdfEle2 = doc.getElementById("article-download");
+		
+		if(pdfEle1 != null){
+			pdfUrlStr = pdfEle1.attr("pdfurl");
+		}else if(pdfEle2 != null){
+			pdfUrlStr = pdfEle2.getElementsByTag("a").first().attr("href");
+		}
+		
 		//pages
 		Element volIssue = doc.getElementsByClass("volIssue").first();
-		String volStr[] = volIssue.text().split(",");
-		String pageStr[] = null;
-		for(String str : volStr){
-			if(str.contains("Pages")){
-				str = str.trim();
-				pageStr = str.substring(5).split("–");
+		if(volIssue != null){
+			String volStr[] = volIssue.text().split(",");
+			String pageStr[] = null;
+			for(String str : volStr){
+				if(str.contains("Pages")){
+					str = str.trim();
+					pageStr = str.substring(5).split("–");
+				}
+			}
+			
+			if(pageStr != null){
+				if(pageStr.length == 2){
+					pages = Integer.valueOf(pageStr[1].trim()) - Integer.valueOf(pageStr[0].trim()) + 1;
+				}else if(pageStr.length == 1){
+					pages = 1;
+				}
 			}
 		}
 		
-		if(pageStr != null){
-			if(pageStr.length == 2){
-				pages = Integer.valueOf(pageStr[1].trim()) - Integer.valueOf(pageStr[0].trim()) + 1;
-			}else if(pageStr.length == 1){
-				pages = 1;
+		//references
+		Element refslist = doc.select(".references.reference-list").first();
+		
+		if(refslist != null){
+			Elements refs = refslist.getElementsByClass("reference-item-container");
+			
+			if(refs != null && refs.size() > 0){
+				for(Element ref : refs){
+					String refStr = ref.text();
+					reference.add(refStr);
+				}
 			}
 		}
-		//no references
 	}
 
 }
