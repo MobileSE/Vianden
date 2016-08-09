@@ -4,11 +4,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -25,6 +22,7 @@ import org.vianden.crawler.IETCrawler;
 import org.vianden.crawler.SpringerCrawler;
 import org.vianden.crawler.USENIXCrawler;
 import org.vianden.crawler.WileyCrawler;
+import org.vianden.filter.TitleFilter;
 import org.vianden.model.Author;
 import org.vianden.model.Publisher;
 import org.vianden.model.Paper;
@@ -45,10 +43,11 @@ public class SearchEngine {
 	 * the [contents] item.
 	 * 
 	 * @param startingYear
+	 * @param titleFilter
 	 * @return all papers of the configured venues from the startingYear.
 	 * @throws Exception
 	 */
-	public List<Paper> search(int startingYear) {
+	public List<Paper> search(int startingYear, TitleFilter titleFilter) {
 		List<Paper> paperlist = new ArrayList<Paper>();
 		urls = ReadConfigFile.readConfigFile(FilePathes.DBLP_CONFIG);
 		errorList = new ArrayList<String>();
@@ -67,7 +66,7 @@ public class SearchEngine {
 		Document doc = null;
 		for (int index = 0; index < urls.size(); ++index) {
 			String dblpUrl = urls.get(index);
-			doc = this.accesssUrlContent(dblpUrl);
+			doc = accesssUrlContent(dblpUrl, AgentInfo.TIME_OUT, AgentInfo.SLEEP_TIME);
 			if (doc == null) {
 				index ++;
 				String errorMsg = "Failed to access the website of " + dblpUrl;
@@ -86,7 +85,7 @@ public class SearchEngine {
 			String venue = map.get("venue");
 			
 			// get papers of each conference and journals
-			List<Paper> list = this.getPapers(url, type, venue);
+			List<Paper> list = this.getPapers(url, type, venue, titleFilter);
 			if (list != null) {
 				paperlist.addAll(list);
 			}
@@ -97,26 +96,44 @@ public class SearchEngine {
 		return paperlist;
 	}
 
-	private Document accesssUrlContent(String url) {
+	/**
+	 * access url content by Jsoup with url, timeout and sleep time
+	 * 
+	 * @param url
+	 * @param TIME_OUT
+	 * @param SLEEP_TIME
+	 * @return Document of content of url
+	 */
+	public static Document accesssUrlContent(String url, final int TIME_OUT, final int SLEEP_TIME) {
 		
 		if(url == null){
 			return null;
 		}
 		
 		Document doc = null;
-		try {
-			doc = Jsoup.connect(url).userAgent(AgentInfo.getUSER_AGENT()).timeout(AgentInfo.getTIME_OUT()).get();
-//			Thread.sleep(AgentInfo.getSLEEP_TIME());
-		} catch (IOException e) {
-			doc = null;
-			String errorMsg = "Invalid url:" + url;
-			this.errorList.add(errorMsg);
-			System.out.println(errorMsg);
+		int time = 1;
+		
+		//for avoiding time out, times the TIME_OUT if the time out happens until get the right result
+		while(doc == null){
+			try {
+				doc = Jsoup.connect(url).userAgent(AgentInfo.USER_AGENT).timeout(TIME_OUT * time).get();
+				Thread.sleep(SLEEP_TIME);
+				break;
+			} catch (IOException e) {
+				doc = null;
+				String errorMsg = "Invalid url:" + url;
+				System.out.println(errorMsg);
+				
+				e.printStackTrace();
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
 			
-			e.printStackTrace();
-//		} catch (InterruptedException e) {
-//			e.printStackTrace();
+			System.out.println("Time out! Re Connected! " + time + " time.");
+
+			++time;
 		}
+		
 		return doc;
 	}
 
@@ -127,10 +144,11 @@ public class SearchEngine {
 	 * @param url(journal or conference page url)
 	 * @param type(article or inproceedings)
 	 * @param venue
+	 * @param titleFilter
 	 * @return the papers list of the single journal or conference
 	 * @throws Exception
 	 */
-	private List<Paper> getPapers(String url, String type, String venue) {
+	private List<Paper> getPapers(String url, String type, String venue, TitleFilter titleFilter) {
 		//if url=null, return
 		if(url == null){
 			String errorMsg = "url:" + url + " = null, " + " venue:" + venue;
@@ -142,7 +160,7 @@ public class SearchEngine {
 
 		Document doc = null;
 		
-		doc = this.accesssUrlContent(url);
+		doc = accesssUrlContent(url, AgentInfo.LONG_TIME_OUT, AgentInfo.SLEEP_TIME);
 		
 		if (doc == null) {
 			String errorMsg = "--Failed to access the website of " + url;
@@ -241,12 +259,30 @@ public class SearchEngine {
 			 *  
 			 */
 			
-			if (title != null && filterByKeyword(title)) {
-				// construct paper with obtained information
-				Paper paper = new Paper();
+//			if (title != null && filterByKeyword(title)) {
+//				// construct paper with obtained information
+//				Paper paper = new Paper();
+//				paper.setYear(year);
+//				paper.setAuthors(authorlist);
+//				paper.setTitle(title);
+//				paper.setDoi(doi);
+//				paper.setVenue(venue);
+//				paper.setPublisher(dbtype);
+//
+//				System.out.println("Paper:"+paper.getTitle());
+//				// add paper to list
+//				list.add(paper);	
+//			}
+			
+			// construct paper with obtained information
+			Paper paper = new Paper();
+			paper.setTitle(title);
+			
+			//titleFilter=null means no title Filter
+			if (titleFilter == null || !titleFilter.filter(paper)) {
+				//refine paper information
 				paper.setYear(year);
 				paper.setAuthors(authorlist);
-				paper.setTitle(title);
 				paper.setDoi(doi);
 				paper.setVenue(venue);
 				paper.setPublisher(dbtype);
@@ -255,49 +291,10 @@ public class SearchEngine {
 				// add paper to list
 				list.add(paper);	
 			}
+			
 		}
 
 		return list;
-	}
-
-	private boolean filterByKeyword(String title) {
-		boolean isKeeped = false;
-		List<String> regaxList = new ArrayList<String>();
-		regaxList = getRegaxList();
-		if(matcher(regaxList, title)) {
-			isKeeped = true;
-		}
-		return isKeeped;
-	}
-
-	private boolean matcher(List<String>regaxList, String title) {
-		boolean finded = false;
-		Pattern pattern = null;
-		Matcher matcher = null;
-		for (int i = 0; i < regaxList.size(); i ++) {
-			pattern = Pattern.compile(regaxList.get(i));
-			matcher = pattern.matcher(title);
-			if (matcher.find()) {
-				finded = true;
-			} else {
-				finded = false;
-				break;
-			}
-		}
-		return finded;
-	}
-
-	private List<String> getRegaxList() {
-		List<String> keywordsList = new ArrayList<String>();
-		keywordsList = ReadConfigFile.readConfigFile(FilePathes.KEYWORD_CONFIG);
-		
-		List<String> regaxList = new ArrayList<String>();
-		Iterator<String> iterator = keywordsList.iterator();
-		while (iterator.hasNext()) {
-			String keywords = iterator.next().trim();
-			regaxList.add("(" + keywords.replaceAll(";", "|") + ")");
-		}
-		return regaxList;
 	}
 
 	/**
@@ -334,7 +331,7 @@ public class SearchEngine {
 							map.put("venue", venue);
 							paperForCrawlList.add(map);
 						}
-						continue;
+						break;
 					}
 				}
 			}
@@ -453,7 +450,7 @@ public class SearchEngine {
 			crawler.finishCrawl();
 		}
 
-		System.out.println("refine paper finished!");
+		System.out.println("refine paper:" + Publisher.getPublisherName(paper.getPublisher()));
 		
 		return paper;
 	}

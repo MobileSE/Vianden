@@ -7,6 +7,8 @@ import java.util.Set;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import org.vianden.SearchEngine;
+import org.vianden.config.AgentInfo;
 import org.vianden.model.Author;
 import org.vianden.model.Paper;
 
@@ -64,7 +66,7 @@ public class ACMCrawler extends AbstractCrawler {
 			String refsuffix = desStr.substring(refstart, refend);
 			
 			//get abstract
-			Document absDoc = this.accesssUrlContent(prefix + abssuffix);
+			Document absDoc = SearchEngine.accesssUrlContent(prefix + abssuffix, AgentInfo.LONG_TIME_OUT, AgentInfo.LONG_SLEEP_TIME);
 			if(absDoc != null){
 				Elements ps = absDoc.getElementsByTag("p");
 				if(ps.size()>0){
@@ -75,7 +77,7 @@ public class ACMCrawler extends AbstractCrawler {
 //			System.out.println(refsuffix);
 			
 			//get references
-			Document refDoc = this.accesssUrlContent(prefix + refsuffix);
+			Document refDoc = SearchEngine.accesssUrlContent(prefix + refsuffix, AgentInfo.SUPER_LONG_TIME_OUT, AgentInfo.LONG_SLEEP_TIME);
 			if(refDoc != null){
 				Elements acmrefs = refDoc.getElementsByTag("tr");
 				if(acmrefs != null){

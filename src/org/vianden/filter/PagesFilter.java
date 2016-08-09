@@ -14,7 +14,7 @@ public class PagesFilter implements IFilter {
 	}
 	
 	@Override
-	public boolean excludeFilter(Paper paper) {
+	public boolean filter(Paper paper) {
 		int minPages = Publisher.isSingleColumn(paper.getPublisher()) ? minSingleColumnPages : minDoubleColumnPages;
 		
 		if(paper.getPages()!=null){
@@ -26,12 +26,6 @@ public class PagesFilter implements IFilter {
 			}
 		}
 		
-		return false;
-	}
-
-	@Override
-	public boolean includeFilter(Paper paper) {
-		// TODO Auto-generated method stub
 		return false;
 	}
 

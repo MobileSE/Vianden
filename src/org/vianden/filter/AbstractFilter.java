@@ -38,7 +38,7 @@ public class AbstractFilter implements IFilter {
 	}
 
 	@Override
-	public boolean excludeFilter(Paper paper) {
+	public boolean filter(Paper paper) {
 		String pAbstract = paper.getAbstract().toLowerCase();
 		
 		//start filtering
@@ -49,12 +49,6 @@ public class AbstractFilter implements IFilter {
 			}
 		}
 		
-		return false;
-	}
-
-	@Override
-	public boolean includeFilter(Paper paper) {
-		// TODO Auto-generated method stub
 		return false;
 	}
 

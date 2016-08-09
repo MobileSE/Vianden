@@ -1,66 +1,38 @@
 package org.vianden.filter;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
+import org.vianden.config.FilePathes;
+import org.vianden.model.MatchTool;
 import org.vianden.model.Paper;
 
 public class TitleFilter implements IFilter{
-	List<String> filterwords = null;
-	private static BufferedReader br = null;
+	private List<String> filterList = null;
 	
-	public TitleFilter(List<String> filterwords) {
-		this.filterwords = filterwords;
+	public TitleFilter(List<String> filterList) {
+		this.filterList = filterList;
 	}
 	
 	public TitleFilter(String configPath) throws IOException{
-		if(configPath == null){
-			configPath = System.getProperty("user.dir") + "/res/titlefilter.config";
-		}
-		
-		//read configs
-		FileReader reader = new FileReader(configPath);
-		br = new BufferedReader(reader);
-		//initialize keywords list
-		filterwords = new ArrayList<String>();
-		
-		String tmp = null;
-		while ((tmp = br.readLine()) != null) {
-			String[] strArr = tmp.split(";");
-			for(int i=0; i<strArr.length; ++i){
-				//add to keywords list with lower case
-				filterwords.add(strArr[i].toLowerCase());
-			}
-		}
+		filterList = MatchTool.getRegexList(configPath);
+	}
+	
+	//default filter words
+	public TitleFilter(){
+		filterList = MatchTool.getRegexList(FilePathes.TITLE_KEYWORD_CONFIG);
 	}
 
 	@Override
-	public boolean excludeFilter(Paper paper) {
-		boolean isFiltered = false;
-		
-		for(int i=0; i<filterwords.size(); ++i){
-			if(paper.getTitle().contains(filterwords.get(i))){
-				isFiltered = true;
-				return isFiltered;
-			}
-		}
-		
-		return false;
-	}
+	public boolean filter(Paper paper) {
+		boolean isFilteredd = true;
 
-	@Override
-	public boolean includeFilter(Paper paper) {
-		
-		for(int i=0; i<filterwords.size(); ++i){
-			if(paper.getTitle().contains(filterwords.get(i))){
-				return true;
-			}
+		//filterList=null or size=0 means no filter applied
+		if(filterList == null || filterList.size() == 0 || MatchTool.matcher(filterList, paper.getTitle())){
+			isFilteredd = false;
 		}
 		
-		return false;
+		return isFilteredd;
 	}
 
 }

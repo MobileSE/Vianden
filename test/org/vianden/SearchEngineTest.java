@@ -9,6 +9,7 @@ import java.util.List;
 import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.vianden.filter.TitleFilter;
 import org.vianden.model.Paper;
 
 public class SearchEngineTest {
@@ -17,7 +18,8 @@ public class SearchEngineTest {
 		SearchEngine se = new SearchEngine();
 		// We can delete some papers in which title does not contain the
 		// keywords.
-		List<Paper> papers = se.search(1950);
+		TitleFilter titleFilter = new TitleFilter();
+		List<Paper> papers = se.search(1950, titleFilter);
 
 		//int count = 0;
 		System.out.println(papers.size());

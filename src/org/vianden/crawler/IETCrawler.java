@@ -4,10 +4,10 @@ import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import org.vianden.SearchEngine;
 import org.vianden.config.AgentInfo;
 import org.vianden.model.Author;
 import org.vianden.model.Paper;
@@ -24,8 +24,7 @@ public class IETCrawler extends AbstractCrawler {
 		//iet database url
 		String ieturl = as.get(2).attr("href");
 		//refine by iet database
-		Document ietdoc = Jsoup.connect(ieturl).userAgent(AgentInfo.getUSER_AGENT())
-				.timeout(2 * AgentInfo.getTIME_OUT()).get();
+		Document ietdoc = SearchEngine.accesssUrlContent(ieturl, AgentInfo.LONG_TIME_OUT, AgentInfo.LONG_SLEEP_TIME);
 		Elements ietmetaEles = ietdoc.getElementsByTag("meta");
 		for(int i=0; i< ietmetaEles.size(); ++i){
 			Element ele = ietmetaEles.get(i);
@@ -75,8 +74,7 @@ public class IETCrawler extends AbstractCrawler {
 		//ieee database url to get pdf
 		//refine by ieee database
 		String ieeeurl = as.get(3).attr("href");
-		Document ieeedoc = Jsoup.connect(ieeeurl).userAgent(AgentInfo.getUSER_AGENT())
-				.timeout(AgentInfo.getTIME_OUT()).get();
+		Document ieeedoc = SearchEngine.accesssUrlContent(ieeeurl, AgentInfo.LONG_TIME_OUT, AgentInfo.LONG_SLEEP_TIME);
 		Elements ieeemetaEles = ieeedoc.getElementsByTag("meta");
 		for(int i=0; i< ieeemetaEles.size(); ++i){
 			Element ele = ieeemetaEles.get(i);

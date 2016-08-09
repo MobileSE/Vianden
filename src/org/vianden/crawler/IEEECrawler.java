@@ -2,10 +2,10 @@ package org.vianden.crawler;
 
 import java.io.IOException;
 
-import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import org.vianden.SearchEngine;
 import org.vianden.config.AgentInfo;
 import org.vianden.model.Paper;
 
@@ -27,8 +27,7 @@ public class IEEECrawler extends AbstractCrawler
 		//can not get absolute address via .attr("abs:href")
 		String refurl = "http://ieeexplore.ieee.org" + ref.attr("href"); 
 		
-		Document redoc = Jsoup.connect(refurl).userAgent(AgentInfo.getUSER_AGENT())
-				.timeout(AgentInfo.getTIME_OUT()).get();
+		Document redoc = SearchEngine.accesssUrlContent(refurl, AgentInfo.LONG_TIME_OUT, AgentInfo.LONG_SLEEP_TIME);
 		Elements docsClass = redoc.getElementsByClass("docs");
 		if(docsClass!=null && docsClass.size()>0){
 			Element docs = docsClass.first();

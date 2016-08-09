@@ -35,4 +35,25 @@ public class Publisher
 		
 		return flag;
 	}
+	
+	public static String getPublisherName(int publisher){
+		String pubName = "";
+		
+		switch(publisher){
+		case Publisher.ACM: pubName = "ACM";
+			break;
+		case Publisher.IEEE: pubName = "IEEE";
+			break;
+		case Publisher.ELSEVIER: pubName = "ELSEVIER";
+			break;
+		case Publisher.WILEY: pubName = "WILEY";
+			break;
+		case Publisher.USENIX: pubName = "USENIX";
+			break;
+		case Publisher.SPRINGER: pubName = "SPRINGER";
+			break;
+		}
+		
+		return pubName;
+	}
 }

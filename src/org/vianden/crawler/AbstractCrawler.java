@@ -6,10 +6,10 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import org.vianden.SearchEngine;
 import org.vianden.config.AgentInfo;
 import org.vianden.model.Author;
 import org.vianden.model.Paper;
@@ -45,7 +45,7 @@ public abstract class AbstractCrawler implements ICrawler
 	}
 	
 	public void commonCrawl() throws IOException{
-		doc = this.accesssUrlContent(paper.getDoi());
+		doc = SearchEngine.accesssUrlContent(paper.getDoi(), AgentInfo.LONG_TIME_OUT, AgentInfo.LONG_SLEEP_TIME);
 		
 		if(doc != null){
 			Elements metaEles = doc.getElementsByTag("meta");
@@ -120,28 +120,5 @@ public abstract class AbstractCrawler implements ICrawler
 	public Paper getPaper() 
 	{
 		return paper;
-	}
-	
-	protected Document accesssUrlContent(String url) {
-		
-		if(url == null){
-			return null;
-		}
-		
-		Document doc = null;
-		
-		try {
-			doc = Jsoup.connect(url).userAgent(AgentInfo.getUSER_AGENT()).timeout(AgentInfo.getLONG_TIME_OUT()).get();
-			Thread.sleep(AgentInfo.getSLEEP_TIME());
-		} catch (IOException e) {
-			e.printStackTrace();
-			doc = null;
-			String errorMsg = "Crawler Invalid url:" + url;
-			System.out.println(errorMsg);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
-		
-		return doc;
 	}
 }
