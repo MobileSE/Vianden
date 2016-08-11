@@ -149,8 +149,8 @@ public class Paper
 		String authorsName = "";
 		Iterator<Author> it = authors.iterator();
 		while (it.hasNext()) {
-			if ("" != authorsName) {
-				authorsName += ",";
+			if (!"".equals(authorsName) ) {
+				authorsName += ";";
 			}
 			authorsName += it.next().getName();
 		}

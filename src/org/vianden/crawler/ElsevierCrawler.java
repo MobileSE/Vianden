@@ -39,10 +39,19 @@ public class ElsevierCrawler extends AbstractCrawler {
 
 		if(affiliations != null){
 			Elements afflis = affiliations.getElementsByTag("li");
-			for(Element affli:afflis){
-				String tag = affli.getElementsByTag("sup").first().text();
-				String affName = affli.getElementsByTag("span").first().text();
-				affMap.put(tag, affName);
+			
+			if(afflis != null){
+				for(Element affli:afflis){
+					Element tagEle = affli.getElementsByTag("sup").first();
+					Element nameEle = affli.getElementsByTag("span").first();
+					
+					if(tagEle != null && nameEle != null){
+						String tag = tagEle.text();
+						String affName = nameEle.text();
+						affMap.put(tag, affName);
+
+					}
+				}
 			}
 		}else{
 			affiliations = doc.getElementsByClass("affiliation").first();
