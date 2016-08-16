@@ -8,6 +8,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ReadConfigFile {
+	/**
+	 * Error Messages
+	 * */
 	public static final String FNFExpStr = "File not found!";
 	public static final String FRFExpStr = "Failed to read the file ";
 	

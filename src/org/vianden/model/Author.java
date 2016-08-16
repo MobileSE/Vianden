@@ -17,9 +17,12 @@ public class Author
 	public String toString() {
 		String afStr = "";
 		for(String str:this.affiliation){
-			afStr += str + ";";
+			if(!"".equals(afStr)){
+				afStr += ",";
+			}
+			afStr += str;
 		}
-		return "author name:"+ name + ", affiliation:" + afStr;
+		return affiliation.size()>0 ? name + ":" + afStr : name;
 	}
 
 	public String getName() {

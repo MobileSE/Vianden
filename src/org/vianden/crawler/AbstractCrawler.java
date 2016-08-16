@@ -56,7 +56,7 @@ public abstract class AbstractCrawler implements ICrawler
 					titileStr = ele.attr("content");
 				}else if(name.equals("citation_keywords")){	//keywords:IEEE,IET,ACM
 					String tmp = ele.attr("content");
-					keywordsStr += tmp.replaceAll("\t|\r|\n", "") + ";";
+					keywordsStr += tmp.replaceAll("\t|\r|\n", "");
 				}else if(name.equals("citation_journal_title") || name.equals("citation_conference")){
 					venueStr = ele.attr("content");
 				}else if(name.equals("citation_author_email")){	//email:IEEE, Springer

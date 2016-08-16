@@ -1,4 +1,4 @@
-package org.vianden.model;
+package org.vianden.tool;
 
 import java.util.ArrayList;
 import java.util.Iterator;

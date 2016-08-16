@@ -4,8 +4,8 @@ import java.io.IOException;
 import java.util.List;
 
 import org.vianden.config.FilePathes;
-import org.vianden.model.MatchTool;
 import org.vianden.model.Paper;
+import org.vianden.tool.MatchTool;
 
 public class TitleFilter implements IFilter{
 	private List<String> filterList = null;
