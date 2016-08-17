@@ -54,7 +54,7 @@ public class SearchEngine {
 	 */
 	public List<Paper> search(int startingYear, TitleFilter titleFilter) {
 		List<Paper> paperlist = new ArrayList<Paper>();
-		urlsList = ReadConfigFile.readConfigFile(FilePathes.DBLP_CONFIG);
+		urlsList = ReadConfigFile.readConfigFile(System.getProperty("user.dir") + FilePathes.DBLP_CONFIG);
 		errorList = new ArrayList<String>();
 		
 		if (urlsList.size() == 1 && urlsList.listIterator().next() == ReadConfigFile.FNFExpStr) {
@@ -99,6 +99,35 @@ public class SearchEngine {
 		}
 
 		return paperlist;
+	}
+	
+	/**
+	 * search papers from dblp with titles
+	 * 
+	 * @param titlesPath file that contains titles to be searhed
+	 * @return return List<Paper> found from dblp according to given titles
+	 * */
+	public List<Paper> search(String titlesPath){
+		List<Paper> paperList = new ArrayList<Paper>();
+		String preUrl = "http://dblp.uni-trier.de/search?q=";
+		
+		urlsList = ReadConfigFile.readConfigFile(titlesPath);
+		errorList = new ArrayList<String>();
+		
+		if (urlsList.size() == 1 && urlsList.listIterator().next() == ReadConfigFile.FNFExpStr) {
+			System.out.println(ReadConfigFile.FNFExpStr);
+			return null;
+		}
+		
+		
+		for (int index = 0; index < urlsList.size(); ++index) {
+			String dblpUrl = preUrl + urlsList.get(index);
+			List<Paper> list = this.getPapers(dblpUrl, null, null, null);
+			
+			paperList.addAll(list);
+		}
+		
+		return paperList;
 	}
 
 	/**
@@ -173,7 +202,8 @@ public class SearchEngine {
 			System.out.println(errorMsg);
 			return null;
 		}
-		Elements entries = doc.select(".entry."+type);
+		Elements entries = doc.select(type == null ? ".entry" : ".entry."+type);
+		
 		System.out.println("get Paper:"+url+" paper numbers:"+entries.size());
 		for (Element ele : entries) {
 			Element data = ele.getElementsByClass("data").first();
@@ -192,6 +222,7 @@ public class SearchEngine {
 			}
 			// get year
 			String year = null;
+			String venue2 = null;
 			Element eYear = null;
 			try {
 				Elements props = ele.getElementsByAttribute("itemprop");
@@ -206,6 +237,10 @@ public class SearchEngine {
 							year = eYear.attr("content");
 						}
 						break;
+					}else if(value.equals("isPartOf")){
+						if(prop.hasText()){
+							venue2 = prop.text();
+						}
 					}
 				}
 				
@@ -289,6 +324,9 @@ public class SearchEngine {
 				paper.setYear(year);
 				paper.setAuthors(authorlist);
 				paper.setDoi(doi);
+				if(venue == null){
+					venue = venue2;
+				}
 				paper.setVenue(venue);
 				paper.setPublisher(dbtype);
 

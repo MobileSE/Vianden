@@ -25,7 +25,7 @@ public class ReadConfigFile {
 		BufferedReader br = null;
 		String lineContent = null;
 		try {
-			reader = new FileReader(System.getProperty("user.dir") + filePath);
+			reader = new FileReader(filePath);
 
 			br = new BufferedReader(reader);
 			while ((lineContent = br.readLine()) != null) {

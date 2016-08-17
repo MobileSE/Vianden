@@ -245,7 +245,7 @@ public class Paper
 		Iterator<String> it = references.iterator();
 		while(it.hasNext()){
 			if(!"".equals(allReferences)){
-				allReferences += ";";
+				allReferences += "\n";
 			}
 			
 			allReferences += it.next().trim();
@@ -264,7 +264,7 @@ public class Paper
 			return;
 		}
 		
-		String[] refs = allReferences.split(";");
+		String[] refs = allReferences.split("\n");
 		
 		for(int i=0; i<refs.length; ++i){
 			references.add(refs[i]);
