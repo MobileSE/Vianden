@@ -109,7 +109,6 @@ public class SearchEngine {
 	 * */
 	public List<Paper> search(String titlesPath){
 		List<Paper> paperList = new ArrayList<Paper>();
-		String preUrl = "http://dblp.uni-trier.de/search?q=";
 		
 		urlsList = ReadConfigFile.readConfigFile(titlesPath);
 		errorList = new ArrayList<String>();
@@ -121,7 +120,7 @@ public class SearchEngine {
 		
 		
 		for (int index = 0; index < urlsList.size(); ++index) {
-			String dblpUrl = preUrl + urlsList.get(index);
+			String dblpUrl = FilePathes.DBLP_SEARCH_STRING + urlsList.get(index);
 			List<Paper> list = this.getPapers(dblpUrl, null, null, null);
 			
 			paperList.addAll(list);
