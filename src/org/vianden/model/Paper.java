@@ -83,8 +83,24 @@ public class Paper
 	public int getPublisher() {
 		return publisher;
 	}
+	
 	public void setPublisher(int publisher) {
 		this.publisher = publisher;
+	}
+	
+	/**
+	 * Automaticaly set publisher by doi
+	 * */
+	public void setPublisherByDoi() {
+		if(doi != null){
+			this.publisher = Publisher.getPublisherByDoi(doi);
+		}else{
+			System.out.println("doi = null, please set doi first!");
+		}
+	}
+	
+	public String getPublisherName() {
+		return Publisher.getPublisherName(publisher);
 	}
 	
 	public String getAbstract() {

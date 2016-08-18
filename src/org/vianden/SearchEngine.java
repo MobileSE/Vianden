@@ -110,17 +110,15 @@ public class SearchEngine {
 	public List<Paper> search(String titlesPath){
 		List<Paper> paperList = new ArrayList<Paper>();
 		
-		urlsList = ReadConfigFile.readConfigFile(titlesPath);
-		errorList = new ArrayList<String>();
+		List<String> titleList = ReadConfigFile.readConfigFile(titlesPath);
 		
-		if (urlsList.size() == 1 && urlsList.listIterator().next() == ReadConfigFile.FNFExpStr) {
+		if (titleList.size() == 1 && titleList.listIterator().next() == ReadConfigFile.FNFExpStr) {
 			System.out.println(ReadConfigFile.FNFExpStr);
 			return null;
 		}
 		
-		
-		for (int index = 0; index < urlsList.size(); ++index) {
-			String dblpUrl = FilePathes.DBLP_SEARCH_STRING + urlsList.get(index);
+		for (int index = 0; index < titleList.size(); ++index) {
+			String dblpUrl = FilePathes.DBLP_SEARCH_STRING + titleList.get(index);
 			List<Paper> list = this.getPapers(dblpUrl, null, null, null);
 			
 			paperList.addAll(list);
@@ -266,24 +264,7 @@ public class SearchEngine {
 			}
 			
 			// get database type by doi number
-			int dbtype = -1;
-			if(doi == null){
-				//do nothing
-			}else if (doi.contains("10.1145")) {
-				dbtype = Publisher.ACM;
-			} else if (doi.contains("10.1109")) {
-				dbtype = Publisher.IEEE;
-			} else if (doi.contains("10.1007")) {
-				dbtype = Publisher.SPRINGER;
-			} else if (doi.contains("10.1016")) {
-				dbtype = Publisher.ELSEVIER;
-			} else if (doi.contains("10.1002")) {
-				dbtype = Publisher.WILEY;
-			} else if (doi.contains("usenix")) {
-				dbtype = Publisher.USENIX;
-			} else if (doi.contains("10.1049")) {
-				dbtype = Publisher.IET;
-			}
+			int dbtype = Publisher.getPublisherByDoi(doi);
 
 			/*
 			 * Filtering out the unrelated papers of which title does not include the keywords.
@@ -297,21 +278,6 @@ public class SearchEngine {
 			 * The value (boolean filter) decides whether we filter the papers before refine method or not.
 			 *  
 			 */
-			
-//			if (title != null && filterByKeyword(title)) {
-//				// construct paper with obtained information
-//				Paper paper = new Paper();
-//				paper.setYear(year);
-//				paper.setAuthors(authorlist);
-//				paper.setTitle(title);
-//				paper.setDoi(doi);
-//				paper.setVenue(venue);
-//				paper.setPublisher(dbtype);
-//
-//				System.out.println("Paper:"+paper.getTitle());
-//				// add paper to list
-//				list.add(paper);	
-//			}
 			
 			// construct paper with obtained information
 			Paper paper = new Paper();
@@ -459,6 +425,8 @@ public class SearchEngine {
 		AbstractCrawler crawler = null;
 
 		switch (paper.getPublisher()) {
+		case -1: paper.setPdfUrl(paper.getDoi());
+			break;
 		case Publisher.ACM:
 			crawler = new ACMCrawler(paper);
 			break;

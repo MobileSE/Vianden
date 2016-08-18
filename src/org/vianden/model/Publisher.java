@@ -56,4 +56,29 @@ public class Publisher
 		
 		return pubName;
 	}
+	
+	public static int getPublisherByDoi(String doi){
+		int dbtype = -1;
+		
+		if(doi == null || doi.substring(doi.length()-3, doi.length()-1).toLowerCase().equals("pdf")){
+			//do nothing
+			dbtype = -1;
+		}else if (doi.contains("10.1145")) {
+			dbtype = Publisher.ACM;
+		} else if (doi.contains("10.1109")) {
+			dbtype = Publisher.IEEE;
+		} else if (doi.contains("10.1007")) {
+			dbtype = Publisher.SPRINGER;
+		} else if (doi.contains("10.1016")) {
+			dbtype = Publisher.ELSEVIER;
+		} else if (doi.contains("10.1002")) {
+			dbtype = Publisher.WILEY;
+		} else if (doi.contains("usenix")) {
+			dbtype = Publisher.USENIX;
+		} else if (doi.contains("10.1049")) {
+			dbtype = Publisher.IET;
+		}
+		
+		return dbtype;
+	}
 }
