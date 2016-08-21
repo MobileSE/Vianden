@@ -19,16 +19,17 @@ public class ConvertTool {
 
 	/**
 	 * Convert paper xls file to List<Papers>
+	 * e.g. xlsPath = "~/Desktop/test.xls"
 	 * @param xlsxPath path of xls
 	 * @return List<Paper> list of papers
 	 * */
 	@SuppressWarnings("resource")
-	public static List<Paper> xlsToPaperList(String xlsxPath, String xlsName){
+	public static List<Paper> xlsToPaperList(String xlsxPath){
 		List<Paper> papers = new ArrayList<Paper>();
 		
 		try {
 			//read from path
-			FileInputStream is = new FileInputStream(new File(xlsxPath + xlsName));
+			FileInputStream is = new FileInputStream(new File(xlsxPath));
 			HSSFWorkbook workBook = new HSSFWorkbook(is);
 			HSSFSheet sheet = workBook.getSheet("Papers");
 			int rowLength = sheet.getPhysicalNumberOfRows();
@@ -66,12 +67,12 @@ public class ConvertTool {
 	
 	/**
 	 * Convert List<Papers> to xls file
+	 * e.g. xlsPath = "~/Desktop/test.xls"
 	 * @param papers list of papers
-	 * @param xlsName the name of xls file
 	 * @return true if success, else false
 	 * */
 	@SuppressWarnings("resource")
-	public static boolean paperListToXls(List<Paper> papers, String xlsPath, String xlsName){
+	public static boolean paperListToXls(List<Paper> papers, String xlsPath){
 		HSSFWorkbook workBook = new HSSFWorkbook();
 		HSSFSheet sheet = workBook.createSheet("Papers");
 		HSSFRow row = sheet.createRow(0);
@@ -111,7 +112,7 @@ public class ConvertTool {
 		
 		FileOutputStream output = null;
 		try {
-			output = new FileOutputStream(xlsPath + xlsName);
+			output = new FileOutputStream(xlsPath);
 			workBook.write(output);
 			output.flush();
 		} catch (FileNotFoundException e) {
