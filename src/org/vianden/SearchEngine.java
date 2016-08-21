@@ -29,14 +29,25 @@ import org.vianden.model.Paper;
 
 public class SearchEngine {
 	/**
-	 *  List of urls from dblp.config
+	 *  Instance of SearchEngine
 	 */
-	private List<String> urlsList = null;
+	private static SearchEngine instance;
 	/**
-	 *  List of errors while searching
+	 *  List of errors messages while searching
 	 */
 	private List<String> errorList = null;
 	
+	/**
+	 * Singleton pattern to SearchEngine
+	 * */
+	private SearchEngine(){}
+	public static synchronized SearchEngine getInstance(){
+		if(instance == null){
+			instance = new SearchEngine();
+		}
+		
+		return instance;
+	}
 
 	/**
 	 * Based on the res/dblp.config, to crawl all the papers relating to the
@@ -54,7 +65,7 @@ public class SearchEngine {
 	 */
 	public List<Paper> search(int startingYear, TitleFilter titleFilter) {
 		List<Paper> paperlist = new ArrayList<Paper>();
-		urlsList = ReadConfigFile.readConfigFile(System.getProperty("user.dir") + FilePathes.DBLP_CONFIG);
+		List<String> urlsList = ReadConfigFile.readConfigFile(System.getProperty("user.dir") + FilePathes.DBLP_CONFIG);
 		errorList = new ArrayList<String>();
 		
 		if (urlsList.size() == 1 && urlsList.listIterator().next() == ReadConfigFile.FNFExpStr) {
@@ -297,7 +308,7 @@ public class SearchEngine {
 
 				System.out.println("Paper:"+paper.getTitle());
 				// add paper to list
-				list.add(paper);	
+				list.add(paper);
 			}
 			
 		}
@@ -463,5 +474,12 @@ public class SearchEngine {
 		System.out.println("refine paper:" + Publisher.getPublisherName(paper.getPublisher()));
 		
 		return paper;
+	}
+	
+	/**
+	 * Reset SearchEngine for next time search
+	 * */
+	public void reset(){
+		errorList.clear();
 	}
 }

@@ -15,7 +15,7 @@ import org.vianden.model.Paper;
 public class SearchEngineTest {
 	
 	public static void main(String[] args) throws Exception {
-		SearchEngine se = new SearchEngine();
+		SearchEngine se = SearchEngine.getInstance();
 		// We can delete some papers in which title does not contain the
 		// keywords.
 		TitleFilter titleFilter = new TitleFilter();
