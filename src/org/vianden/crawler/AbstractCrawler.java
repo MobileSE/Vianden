@@ -20,8 +20,7 @@ import org.vianden.model.Paper;
  * @author li.li
  *
  */
-public abstract class AbstractCrawler implements ICrawler
-{
+public abstract class AbstractCrawler implements ICrawler {
 	protected Paper paper = null;
 	protected String titileStr = "";
 	protected String abstractStr = "";
@@ -36,8 +35,7 @@ public abstract class AbstractCrawler implements ICrawler
 	protected List<Author> authors = null;
 	protected Document doc = null;
 	
-	public AbstractCrawler(Paper paper) throws IOException
-	{
+	public AbstractCrawler(Paper paper) throws IOException{
 		//initialize
 		this.paper = paper;
 		authors = new ArrayList<Author>();
@@ -110,6 +108,7 @@ public abstract class AbstractCrawler implements ICrawler
 		paper.setPdfUrl(pdfUrlStr.trim());
 		paper.setPages(String.valueOf(pages).trim());
 		paper.setReferences(reference);
+		
 		if(authors.size()>0){
 			paper.setAuthors(authors);
 		}
@@ -117,8 +116,7 @@ public abstract class AbstractCrawler implements ICrawler
 	}
 
 	@Override
-	public Paper getPaper() 
-	{
+	public Paper getPaper(){
 		return paper;
 	}
 }

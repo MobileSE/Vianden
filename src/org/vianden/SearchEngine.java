@@ -35,12 +35,18 @@ public class SearchEngine {
 	/**
 	 *  List of errors messages while searching
 	 */
-	private List<String> errorList = null;
+	public List<String> errorList = null;
+	
+	/**
+	 * private constructor of SearchEngine
+	 * */
+	private SearchEngine(){
+		errorList = new ArrayList<String>();
+	}
 	
 	/**
 	 * Singleton pattern to SearchEngine
 	 * */
-	private SearchEngine(){}
 	public static synchronized SearchEngine getInstance(){
 		if(instance == null){
 			instance = new SearchEngine();
@@ -64,9 +70,10 @@ public class SearchEngine {
 	 * @throws Exception
 	 */
 	public List<Paper> search(int startingYear, TitleFilter titleFilter) {
+		// list of papers to return
 		List<Paper> paperlist = new ArrayList<Paper>();
+		// load config files from default path
 		List<String> urlsList = ReadConfigFile.readConfigFile(System.getProperty("user.dir") + FilePathes.DBLP_CONFIG);
-		errorList = new ArrayList<String>();
 		
 		if (urlsList.size() == 1 && urlsList.listIterator().next() == ReadConfigFile.FNFExpStr) {
 			System.out.println(ReadConfigFile.FNFExpStr);
@@ -469,6 +476,7 @@ public class SearchEngine {
 			crawler.crawl();
 			// set data to paper
 			crawler.finishCrawl();
+			crawler = null;
 		}
 
 		System.out.println("refine paper:" + Publisher.getPublisherName(paper.getPublisher()));

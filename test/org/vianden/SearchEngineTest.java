@@ -11,6 +11,7 @@ import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.vianden.filter.TitleFilter;
 import org.vianden.model.Paper;
+import org.vianden.model.Publisher;
 
 public class SearchEngineTest {
 	
@@ -62,7 +63,7 @@ public class SearchEngineTest {
 			row.createCell(2).setCellValue(paper.getYear());
 			row.createCell(3).setCellValue(paper.getDoi());
 			row.createCell(4).setCellValue(paper.getVenue());
-			row.createCell(5).setCellValue(paper.getPublisher());
+			row.createCell(5).setCellValue(Publisher.getPublisherName(paper.getPublisher()));
 			row.createCell(6).setCellValue(paper.getAbstract());
 			row.createCell(7).setCellValue(paper.getPages());
 			row.createCell(8).setCellValue(paper.getEmail());

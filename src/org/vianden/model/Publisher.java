@@ -60,7 +60,7 @@ public class Publisher
 	public static int getPublisherByDoi(String doi){
 		int dbtype = -1;
 		
-		if(doi == null || doi.substring(doi.length()-3, doi.length()-1).toLowerCase().equals("pdf")){
+		if(doi == null || doi.substring(doi.length()-3, doi.length()).toLowerCase().equals("pdf")){
 			//do nothing
 			dbtype = -1;
 		}else if (doi.contains("10.1145")) {
