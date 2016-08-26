@@ -10,13 +10,18 @@ import org.vianden.config.ReadConfigFile;
 
 public class MatchTool {
 	
-	public static boolean matcher(List<String>regaxList, String title) {
+	/**
+	 * Determine whether matched with the given string
+	 * 
+	 * @return true if matched, false while not matched
+	 * */
+	public static boolean matcher(List<String>regaxList, String string) {
 		boolean finded = false;
 		Pattern pattern = null;
 		Matcher matcher = null;
 		for (int i = 0; i < regaxList.size(); i ++) {
 			pattern = Pattern.compile(regaxList.get(i));
-			matcher = pattern.matcher(title);
+			matcher = pattern.matcher(string);
 			if (matcher.find()) {
 				finded = true;
 			} else {
@@ -27,6 +32,11 @@ public class MatchTool {
 		return finded;
 	}
 	
+	/**
+	 * Get regex list from config path
+	 * 
+	 * @return list of regex
+	 * */
 	public static List<String> getRegexList(String configPath) {
 		List<String> keywordsList = new ArrayList<String>();
 		keywordsList = ReadConfigFile.readConfigFile(configPath);

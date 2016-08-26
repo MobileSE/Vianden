@@ -17,7 +17,11 @@ public class Publisher
 	public static final int IGI_GLOBAL = 13;					//International Journal of Information Security and Privacy (IJISP)
 	//...more
 	
-	
+	/**
+	 *  Determine whether page is single or double column
+	 *  
+	 *  @return true if page is single column, false while double
+	 * */
 	public static boolean isSingleColumn(int publisher){
 		boolean flag = false;
 		
@@ -57,6 +61,11 @@ public class Publisher
 		return pubName;
 	}
 	
+	/**
+	 *  Determine the publisher type according to doi
+	 *  
+	 *  @return the int number of publisher
+	 * */
 	public static int getPublisherByDoi(String doi){
 		int dbtype = -1;
 		

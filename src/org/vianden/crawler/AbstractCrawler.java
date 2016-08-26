@@ -42,6 +42,10 @@ public abstract class AbstractCrawler implements ICrawler {
 		reference = new ArrayList<String>();
 	}
 	
+	
+	/**
+	 *  Common part of the crawling
+	 * */
 	public void commonCrawl() throws IOException{
 		doc = SearchEngine.accesssUrlContent(paper.getDoi(), AgentInfo.LONG_TIME_OUT, AgentInfo.LONG_SLEEP_TIME);
 		
@@ -98,6 +102,9 @@ public abstract class AbstractCrawler implements ICrawler {
 		
 	}
 	
+	/**
+	 *  Final part of the crawling
+	 * */
 	public void finishCrawl(){
 		//set paper's informations
 		paper.setTitle(titileStr);
