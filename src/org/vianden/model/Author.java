@@ -14,8 +14,15 @@ public class Author
 	}
 
 	@Override
-	public String toString() {
+	public String toString() 
+	{
+		if (null == affiliation)
+		{
+			return name;
+		}
+		
 		String afStr = "";
+		
 		for(String str:this.affiliation){
 			if(!"".equals(afStr)){
 				afStr += ",";

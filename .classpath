@@ -9,5 +9,8 @@
 	<classpathentry kind="lib" path="libs/poi-ooxml-3.13-20150929.jar"/>
 	<classpathentry kind="lib" path="libs/xmlbeans-2.6.0.jar"/>
 	<classpathentry kind="lib" path="libs/poi-ooxml-schemas-3.13-20150929.jar"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/Mudam"/>
+	<classpathentry kind="lib" path="/Users/li.li/Project2016/workspace_for_sselab/Vianden/libs/jdom-2.0.5.jar"/>
+	<classpathentry kind="lib" path="/Users/li.li/Project2016/workspace_for_sselab/Vianden/libs/commons-io-2.5.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

@@ -9,7 +9,7 @@ import org.apache.poi.ss.usermodel.Sheet;
 
 public class LatexTableReport 
 {
-	private int startRowNum = 2;
+	private int startRowNum = 1;
 	
 	/**
 	 * Generating latex source code for the given columns in a single column table manner.
@@ -87,6 +87,74 @@ public class LatexTableReport
 		output.append("\\end{tabular}" + "\n");
 		output.append("}" + "\n");
 		output.append("\\end{table" + (usingDoubleColumn? "*" : "") + "}" + "\n");
+		
+		System.out.println(output.toString());
+		return output.toString();
+	}
+	
+	public String toSimpleListTable(Sheet sheet, int toolNameIndex, int bibIndex, int lastRowNum, int[] columns, String caption, String[] headers, String tableName, double lineWidthRate)
+	{
+		StringBuilder output = new StringBuilder();
+		
+		output.append("\\begin{table*}[!h]" + "\n");
+		output.append("\\centering" + "\n");
+		output.append("\\caption{" + caption + "}" + "\n");
+		output.append("\\label{tab:" + tableName + "}" + "\n");
+		
+		String cn = "l";
+		for (int i = 0; i < columns.length; i++)
+		{
+			cn += "l";
+		}
+		
+		output.append("\\resizebox{" + lineWidthRate + "\\linewidth}{!}{" + "\n");
+		output.append("\\begin{tabular} { " + cn + " }" + "\n");
+		output.append("\\hline" + "\n");
+		
+		StringBuilder header = new StringBuilder();
+		header.append("Tool" + "\n");
+		for (int i = 0; i < columns.length; i++)
+		{
+			header.append(" & " + headers[i]);
+		}
+		output.append(header.toString() + "\\\\" + " \n");
+		
+		output.append("\\hline" + "\n");
+		
+		for (int rowNum = startRowNum; rowNum <= lastRowNum; rowNum++)
+		{
+			Row row = sheet.getRow(rowNum);
+			if (null != row)
+			{
+				StringBuilder sb = new StringBuilder();
+				
+				String toolName = row.getCell(toolNameIndex).toString();
+				String bibID = row.getCell(bibIndex).toString();
+				
+				sb.append(toolName + "~\\cite{" + bibID + "}");
+				
+				for (int i = 0; i < columns.length; i++)
+				{
+					String str = row.getCell(columns[i]).toString();
+				
+					if (3 == columns[i])
+					{
+						str = (int) Double.parseDouble(str) + "";
+					}
+					
+					str = str.replace("&", "\\&");
+					
+					sb.append("&" + str);
+				}
+				
+				output.append(sb.toString() + "\\\\" + " \n");
+			}
+		}
+		
+		output.append("\\hline" + "\n");
+		output.append("\\end{tabular}" + "\n");
+		output.append("}" + "\n");
+		output.append("\\end{table*}" + "\n");
 		
 		System.out.println(output.toString());
 		return output.toString();

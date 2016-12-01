@@ -185,10 +185,15 @@ public class Paper
 		 * Member variables 'authors' and 'references' are belong the type of List,
 		 * so, authors.toString() and referenes.toString() won't return what we really want.
 		 */
-		return "Paper [pTitle=" + title + ", pAuthors=" + getAllAuthors() + ", pYear=" + year + ", pDoi=" + doi
+		/*return "Paper [pTitle=" + title + ", pAuthors=" + getAllAuthors() + ", pYear=" + year + ", pDoi=" + doi
 				+ ", pVenue=" + venue + ", pDatabaseType=" + publisher + ", pAbstract=" + _abstract + ", pPages="
 				+ pages + ", pEmail=" + email + ", pKeywords=" + keywords + ", pPdfUrl=" + pdfUrl + ", pReferences="
 				+ getAllReference() + "]";
+		*/
+		//tmp version
+		return "Paper [pTitle=" + title + ", pAuthors=" + getAllAuthors() + ", pYear=" + year + ", pDoi=" + doi
+				+ ", pVenue=" + venue + ", pDatabaseType=" + publisher + ", pAbstract=" + _abstract + ", pPages="
+				+ pages + ", pEmail=" + email + ", pKeywords=" + keywords + ", pPdfUrl=" + pdfUrl + "]";
 	}
 	
 	public String getAllAuthorsName() {

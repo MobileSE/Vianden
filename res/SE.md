@@ -1,9 +1,6 @@
-Journal
-A
 http://dblp.uni-trier.de/db/journals/toplas/
 http://dblp.uni-trier.de/db/journals/tosem/
 http://dblp.uni-trier.de/db/journals/tse/
-二、B类
 http://dblp.uni-trier.de/db/journals/ase/
 http://dblp.uni-trier.de/db/journals/ese/
 http://dblp.uni-trier.de/db/journals/tsc/
@@ -17,7 +14,6 @@ http://dblp.uni-trier.de/db/journals/scp/
 http://dblp.uni-trier.de/db/journals/sosym/
 http://dblp.uni-trier.de/db/journals/spe/
 http://dblp.uni-trier.de/db/journals/stvr/index.html
-三、C类
 http://dblp.uni-trier.de/db/journals/cl/index.html
 http://dblp.uni-trier.de/db/journals/ijseke/index.html
 http://dblp.uni-trier.de/db/journals/sttt/
@@ -26,9 +22,6 @@ http://dblp.uni-trier.de/db/journals/jwe/
 http://dblp.uni-trier.de/db/journals/soca/
 http://dblp.uni-trier.de/db/journals/sqj/
 http://dblp.uni-trier.de/db/journals/tplp/
-
-Conference
-一、A类
 http://dblp.uni-trier.de/db/conf/sigsoft/
 http://dblp.uni-trier.de/db/conf/oopsla/
 http://dblp.uni-trier.de/db/conf/icse/
@@ -37,7 +30,6 @@ http://dblp.uni-trier.de/db/conf/pldi/
 http://dblp.uni-trier.de/db/conf/popl/
 http://dblp.uni-trier.de/db/conf/sosp/
 http://dblp.uni-trier.de/db/conf/kbse/
-二、B类
 http://dblp.uni-trier.de/db/conf/ecoop/
 http://dblp.uni-trier.de/db/conf/etaps/
 http://dblp.uni-trier.de/db/conf/fm/
@@ -59,7 +51,6 @@ http://dblp.uni-trier.de/db/conf/middleware/
 http://dblp.uni-trier.de/db/conf/wcre/
 http://dblp.uni-trier.de/db/conf/hotos/
 http://dblp.uni-trier.de/db/conf/esem/
-
 http://dblp.uni-trier.de/db/conf/paste/
 http://dblp.uni-trier.de/db/conf/aplas/
 http://dblp.uni-trier.de/db/conf/apsec/

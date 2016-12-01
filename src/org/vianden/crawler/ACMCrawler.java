@@ -77,6 +77,7 @@ public class ACMCrawler extends AbstractCrawler {
 //			System.out.println(refsuffix);
 			
 			//get references
+			/*
 			Document refDoc = SearchEngine.accesssUrlContent(prefix + refsuffix, AgentInfo.SUPER_LONG_TIME_OUT, AgentInfo.LONG_SLEEP_TIME);
 			if(refDoc != null){
 				Elements acmrefs = refDoc.getElementsByTag("tr");
@@ -88,7 +89,7 @@ public class ACMCrawler extends AbstractCrawler {
 				}else{
 					System.out.println("ref null");
 				}	
-			}
+			}*/
 		}
 	}
 

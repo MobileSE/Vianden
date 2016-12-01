@@ -6,8 +6,8 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.poi.hssf.usermodel.HSSFCell;
 import org.apache.poi.hssf.usermodel.HSSFRow;
@@ -72,7 +72,7 @@ public class ConvertTool {
 	 * @return true if success, else false
 	 * */
 	@SuppressWarnings("resource")
-	public static boolean paperListToXls(List<Paper> papers, String xlsPath){
+	public static boolean paperToXls(Set<Paper> papers, String xlsPath){
 		HSSFWorkbook workBook = new HSSFWorkbook();
 		HSSFSheet sheet = workBook.createSheet("Papers");
 		HSSFRow row = sheet.createRow(0);
@@ -89,10 +89,9 @@ public class ConvertTool {
 		row.createCell(10).setCellValue("PdfUrl");
 		row.createCell(11).setCellValue("References");
 		
-		Iterator<Paper> it = papers.iterator();
 		int rowNumber = 1;
-		while (it.hasNext()) {
-			Paper paper = it.next();
+		for (Paper paper : papers)
+		{
 			row = sheet.createRow(rowNumber);
 			row.createCell(0).setCellValue(paper.getTitle());
 			row.createCell(1).setCellValue(paper.getAllAuthors());
